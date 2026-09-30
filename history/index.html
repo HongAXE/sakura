@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>樱花社社史 · 科高樱花社</title>
+    <link rel="stylesheet" href="../static/sakura.css">
+    <style>
+        /* 返回主页悬浮按钮 */
+        .back-home {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            color: var(--sakura-dark);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(224, 90, 109, 0.15);
+            transition: all 0.3s;
+            border: 1px solid var(--sakura-pink);
+            font-size: 0.9rem;
+        }
+        .back-home:hover {
+            background: var(--sakura-dark);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(224, 90, 109, 0.3);
+        }
+        
+        /* 社史图片展示样式 */
+        .history-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 15px;
+            display: block;
+        }
+        
+        /* 并排图片排版 */
+        .history-img-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .history-img-grid .history-img {
+            margin-top: 0;
+        }
+        
+        @media (max-width: 600px) {
+            .history-img-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sakura-bg" id="sakura-bg"></div>
+    <a href="../" class="back-home">← 返回主页</a>
+
+    <div class="container">
+        <div class="page-title">
+            <h1>樱花社社史</h1>
+            <p>历久弥新 · 记录科高樱花社的点点滴滴</p>
+            <!-- 在这里展示拟人化立绘，作为页面点缀 -->
+            <img src="../static/image/personification.png" alt="樱花社拟人化立绘" class="history-img" style="max-width: 300px; margin: 20px auto 0;">
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <span class="timeline-year">2013年</span>
+                    <h3>社团初创，初具规模</h3>
+                    <p>樱花社于2013年（创校第二年）建立。此时社团设立了三个部门：<span class="highlight">绘画部、策划部、cos部</span>。每周各部门开展一次活动，氛围轻松自由。</p>
+                    <p>首任社长为贴吧用户“沐七NANA”，绘画部部长为“紫色倒皇冠”，cos部部长为“兰o科”。此时社团位于国际体系一楼的日本文化体验教室，配备了日式榻榻米活动室。</p>
+                    <img src="../static/image/sakura-past.png" alt="樱花社初版社徽" class="history-img">
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <span class="timeline-year">2014年</span>
+                    <h3>确定社徽，招新口号出炉</h3>
+                    <p>14年8月，正式确定由“猫君”设计的社徽，持续沿用至2026年，成为社团极具意义的标志。</p>
+                    <p>同年招新宣传语极具时代特色：“找绅士，找秀吉，到科高樱花社！国家优质机构，实行国家3个1政策，是你值得信赖的不二之选！”</p>
+                    <img src="../static/image/intro-2014.png" alt="2014年招新宣传" class="history-img">
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <span class="timeline-year">2016年</span>
+                    <h3>重新出发，展望未来</h3>
+                    <p>时任社长“扣子”发表招新说明，回顾了樱花社四年的跌跌撞撞，将其比作“需要关怀的可爱小宝宝”，并号召大家加入QQ群（552536279）一起建设社团。</p>
+                    <div class="history-img-grid">
+                        <img src="../static/image/intro-2016.1.png" alt="2016年招新说明1" class="history-img">
+                        <img src="../static/image/intro-2016.2.png" alt="2016年招新说明2" class="history-img">
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <span class="timeline-year">2017年</span>
+                    <h3>活动室拆除，精彩展演</h3>
+                    <p>暑假期间，伴随社团多年的日式榻榻米活动室被拆除（默哀10秒）。</p>
+                    <p>尽管如此，社团依然活跃。在当年的社团展演上，樱花社带来了长达8分钟的“极乐净土”宅舞表演（B站视频：BV1Rx411v7wt）。</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <span class="timeline-year">2018 - 2020年</span>
+                    <h3>百花齐放与尝试合作</h3>
+                    <p>学校涌现出ACG视频录制社、阿瓦隆史学社、ACG社等竞品/同类社团。樱花社曾发起ACG社团合作组团，组织跨社活动，虽最终因种种原因未能如愿，但这几年是社团活动最丰富多彩的“百花齐放”时代。</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <span class="timeline-year">2021 - 2025年</span>
+                    <h3>至暗时刻与艰难前行</h3>
+                    <p>22-25年期间，社团发展严重受阻，部门发展停滞，难以自主选择社员。受外部环境影响，校内对ACG文化打击严重，社团进入“至暗时刻”。</p>
+                    <p>在此期间，仅维持百团大战等极少数活动，多次展演与线下聚集被迫取消。</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <span class="timeline-year">2023年</span>
+                    <h3>游园会大赚一笔</h3>
+                    <p>在5月的游园会上，樱花社摊位大放异彩，现场售卖周边与零食，最终使得社存款突破两千元大关！</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <span class="timeline-year">2026年</span>
+                    <h3>新篇开启</h3>
+                    <p>樱花社仍在继续前行。新的社徽、新的期许，欢迎所有热爱 ACGN 的同学加入。</p>
+                    <img src="../static/image/sakura-new.png" alt="2026年新版社徽" class="history-img">
+                </div>
+            </div>
+        </div>
+
+        <div class="appendix">
+            <h2>历届指导老师</h2>
+            <table>
+                <tr><th>年份</th><th>姓名</th><th>备注</th></tr>
+                <tr><td>2013 - ?</td><td>李银华</td><td>首届指导老师，日语老师</td></tr>
+                <tr><td>? - 2023</td><td>洪熙惠</td><td>日语老师（已不在科高）</td></tr>
+                <tr><td>2023 - 至今</td><td>申旭</td><td>北师大世界史硕士，资深养猫专业户</td></tr>
+            </table>
+
+            <h2>历届社长与干部（部分）</h2>
+            <table>
+                <tr><th>年份</th><th>社长/主要负责人</th></tr>
+                <tr><td>2013</td><td>沐七NANA（首任社长）</td></tr>
+                <tr><td>2014</td><td>七染风</td></tr>
+                <tr><td>2015</td><td>Xx、Berserk Miyuki</td></tr>
+                <tr><td>2016</td><td>澄</td></tr>
+                <tr><td>2021</td><td>熊社长猫猫</td></tr>
+                <tr><td>2022</td><td>黄社长kksk、陈部长、林部长、黄部长等</td></tr>
+                <tr><td>2023</td><td>轩酒小灯、胧月、水水、章鱼等</td></tr>
+                <tr><td>2024</td><td>李社长 李泽天胤</td></tr>
+                <tr><td>2025</td><td>蔡社长 Reverie、姚财务、陈秘书等</td></tr>
+                <tr><td>2026</td><td>许社长 Cyan、汪秘书</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 深圳科学高中樱花社 · 由 HongAX 开发<br>
+        本文内容整理自《樱花社社史》，仅供娱乐
+    </footer>
+
+    <script>
+        const sakuraBg = document.getElementById('sakura-bg');
+        for (let i = 0; i < 30; i++) {
+            const sakura = document.createElement('div');
+            sakura.classList.add('sakura');
+            const size = Math.random() * 12 + 6;
+            sakura.style.width = size + 'px';
+            sakura.style.height = size + 'px';
+            sakura.style.left = Math.random() * 100 + 'vw';
+            sakura.style.animationDuration = (Math.random() * 5 + 8) + 's';
+            sakura.style.animationDelay = Math.random() * 5 + 's';
+            sakuraBg.appendChild(sakura);
+        }
+    </script>
+    <script src="../static/music-player.js" data-src="../static/music/music.mp3"></script>
+</body>
+</html>
