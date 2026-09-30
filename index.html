@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科高樱花社 · 深圳科学高中 ACGN 同好会</title>
+    <link rel="stylesheet" href="static/sakura.css">
+    <style>
+        /* ===== 针对主页的局部优化 ===== */
+        .hero {
+            padding-top: 120px;
+        }
+        .logo-wrapper {
+            margin-bottom: 25px;
+            display: inline-block;
+            position: relative;
+        }
+        .logo-wrapper img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border-radius: 50%;
+            background: #ffffff;
+            padding: 15px;
+            box-shadow: 0 10px 35px rgba(224, 90, 109, 0.25);
+            transition: all 0.4s ease;
+            border: 2px solid rgba(255, 183, 197, 0.5);
+        }
+        .logo-wrapper img:hover {
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: 0 15px 45px rgba(224, 90, 109, 0.35);
+        }
+        .quick-nav {
+            width: 100%;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+        .btn-card {
+            flex: 1;
+            min-width: 260px;
+            max-width: 360px;
+            height: 140px;
+            border-radius: 24px;
+            padding: 20px;
+        }
+        .btn-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+        .btn-card span {
+            font-size: 1.15rem;
+        }
+        @media (max-width: 600px) {
+            .hero { padding-top: 80px; }
+            .logo-wrapper img { width: 130px; height: 130px; padding: 10px; }
+            .btn-card { min-width: 100%; height: 110px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sakura-bg" id="sakura-bg"></div>
+
+    <section class="hero">
+        <div class="hero-badge">深圳科学高中 · 正统 ACGN 社团</div>
+        <div class="logo-wrapper">
+            <img src="static/image/sakura.png" alt="樱花社社徽">
+        </div>
+        <h1>科高樱花社</h1>
+        <p>历久弥新，为热爱 ACGN 的科高学子提供交流与分享的平台。<br>找绅士，找秀吉，到科高樱花社！</p>
+
+        <div class="quick-nav">
+            <a href="history/" class="btn-card">
+                <div class="icon">📜</div>
+                <span>阅览社史</span>
+            </a>
+            <a href="quiz/" class="btn-card">
+                <div class="icon">🎯</div>
+                <span>动漫小测</span>
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        © 2026 深圳科学高中樱花社 · 由 HongAX 开发<br>
+        本网站仅用于社团展示，素材版权归原作者所有
+    </footer>
+
+    <script>
+        const sakuraBg = document.getElementById('sakura-bg');
+        for (let i = 0; i < 30; i++) {
+            const sakura = document.createElement('div');
+            sakura.classList.add('sakura');
+            const size = Math.random() * 12 + 6;
+            sakura.style.width = size + 'px';
+            sakura.style.height = size + 'px';
+            sakura.style.left = Math.random() * 100 + 'vw';
+            sakura.style.animationDuration = (Math.random() * 5 + 8) + 's';
+            sakura.style.animationDelay = Math.random() * 5 + 's';
+            sakuraBg.appendChild(sakura);
+        }
+    </script>
+    <script src="static/music-player.js" data-src="static/music/music.mp3"></script>
+</body>
+</html>
