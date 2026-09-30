@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACGN小测试 · 科高樱花社</title>
+    <link rel="stylesheet" href="../static/sakura.css">
+    <style>
+        /* 返回主页悬浮按钮 */
+        .back-home {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            color: var(--sakura-dark);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(224, 90, 109, 0.15);
+            transition: all 0.3s;
+            border: 1px solid var(--sakura-pink);
+            font-size: 0.9rem;
+        }
+        .back-home:hover {
+            background: var(--sakura-dark);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(224, 90, 109, 0.3);
+        }
+        .container {
+            margin-top: 100px;
+        }
+
+        /* 进度显示 */
+        .progress-bar {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .progress-bar .current {
+            color: var(--sakura-dark);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* 单题卡片 */
+        .question {
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* 导航按钮组 */
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        .btn-nav {
+            flex: 1;
+            padding: 14px;
+            border: 1px solid var(--sakura-pink);
+            background: rgba(255, 255, 255, 0.6);
+            color: var(--sakura-dark);
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-nav:hover:not(:disabled) {
+            background: var(--sakura-pink);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(224, 90, 109, 0.2);
+        }
+        .btn-nav:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        /* 淡入动画 */
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* 结果页按钮组 */
+        .result-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .result-buttons .btn-submit {
+            flex: 1;
+            min-width: 140px;
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.6);
+            color: var(--sakura-dark);
+            border: 1px solid var(--sakura-pink);
+        }
+        .btn-secondary:hover {
+            background: var(--sakura-pink);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="sakura-bg" id="sakura-bg"></div>
+    <a href="../" class="back-home">← 返回主页</a>
+
+    <div class="container">
+        <!-- 答题卡片 -->
+        <div class="quiz-card" id="quiz-card">
+            <h1>🎯 科高樱花社 · ACGN 小测试</h1>
+
+            <div class="progress-bar" id="progress-bar">
+                第 <span class="current" id="current-num">1</span> / <span id="total-num">15</span> 题
+            </div>
+
+            <div id="question-container">
+                <p style="text-align: center; color: #666;">正在加载题库，请稍候...</p>
+            </div>
+
+            <div class="nav-buttons" id="nav-buttons" style="display: none;">
+                <button class="btn-nav" id="prev-btn" onclick="prevQuestion()">← 上一题</button>
+                <button class="btn-nav" id="next-btn" onclick="nextQuestion()">下一题 →</button>
+                <button class="btn-submit" id="submit-btn" onclick="submitQuiz()" style="display: none;">提交答案</button>
+            </div>
+        </div>
+
+        <!-- 结果卡片 -->
+        <div class="quiz-card result" id="result-card" style="display: none;">
+            <h2>测试结果</h2>
+            <div class="score" id="final-score">0</div>
+            <p id="result-desc"></p>
+            <div class="result-buttons">
+                <button class="btn-submit" onclick="location.reload()">再测一次</button>
+                <button class="btn-submit btn-secondary" onclick="location.href='../history/'">看看社史</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 深圳科学高中樱花社 · 由 HongAX 开发
+    </footer>
+
+    <script>
+        const TOTAL_QUESTIONS = 15;  // 每次抽取的题目数量
+
+        let quizData = [];           // 抽取的题目
+        let currentIndex = 0;        // 当前题目序号
+        let userAnswers = [];        // 用户答案记录（存选项索引）
+        let allQuestions = [];       // 全部题库
+
+        // 加载题库
+        async function loadQuiz() {
+            try {
+                const response = await fetch('./qna.txt');
+                if (!response.ok) throw new Error('网络请求失败');
+                const text = await response.text();
+
+                // 解析全部题目
+                allQuestions = text.split('\n')
+                    .filter(line => line.trim() !== '')
+                    .map(line => {
+                        const parts = line.split('|');
+                        return {
+                            q: parts[0].trim(),
+                            options: [parts[1].trim(), parts[2].trim(), parts[3].trim(), parts[4].trim()],
+                            answer: parseInt(parts[5].trim())
+                        };
+                    });
+
+                if (allQuestions.length === 0) throw new Error('题库为空');
+
+                // 随机抽取 15 题
+                quizData = shuffleArray([...allQuestions]).slice(0, Math.min(TOTAL_QUESTIONS, allQuestions.length));
+                userAnswers = new Array(quizData.length).fill(null);
+
+                document.getElementById('total-num').innerText = quizData.length;
+                document.getElementById('nav-buttons').style.display = 'flex';
+
+                renderQuestion();
+            } catch (error) {
+                console.error('加载题库失败:', error);
+                document.getElementById('question-container').innerHTML = 
+                    '<p style="text-align: center; color: #e05a6d;">❌ 题库加载失败。<br><br>若您是直接双击打开本地文件，浏览器会限制读取 txt 文件。请尝试使用本地服务器或将网页部署到 GitHub Pages 后再试。</p>';
+            }
+        }
+
+        // 洗牌算法（Fisher-Yates）
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 渲染当前题目
+        function renderQuestion() {
+            const item = quizData[currentIndex];
+            const container = document.getElementById('question-container');
+
+            let html = `<div class="question fade-in"><p>${currentIndex + 1}. ${item.q}</p><div class="options">`;
+            item.options.forEach((opt, optIndex) => {
+                const checked = userAnswers[currentIndex] === optIndex ? 'checked' : '';
+                html += `<label><input type="radio" name="q${currentIndex}" value="${optIndex}" ${checked} onchange="saveAnswer(${optIndex})"> ${opt}</label>`;
+            });
+            html += `</div></div>`;
+
+            container.innerHTML = html;
+
+            // 更新进度
+            document.getElementById('current-num').innerText = currentIndex + 1;
+
+            // 更新按钮状态
+            document.getElementById('prev-btn').disabled = (currentIndex === 0);
+            document.getElementById('next-btn').disabled = (currentIndex === quizData.length - 1);
+            document.getElementById('next-btn').style.display = (currentIndex === quizData.length - 1) ? 'none' : 'block';
+            document.getElementById('submit-btn').style.display = (currentIndex === quizData.length - 1) ? 'block' : 'none';
+        }
+
+        // 保存当前答案
+        function saveAnswer(optIndex) {
+            userAnswers[currentIndex] = optIndex;
+        }
+
+        // 上一题
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // 下一题
+        function nextQuestion() {
+            // 检查是否作答
+            if (userAnswers[currentIndex] === null) {
+                alert('请先选择答案再进入下一题哦～');
+                return;
+            }
+            if (currentIndex < quizData.length - 1) {
+                currentIndex++;
+                renderQuestion();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // 提交
+        function submitQuiz() {
+            // 检查最后一题是否作答
+            if (userAnswers[currentIndex] === null) {
+                alert('还有题目没有作答哦～');
+                return;
+            }
+
+            // 统计分数
+            let correctCount = 0;
+            const wrongList = [];
+            quizData.forEach((item, index) => {
+                if (userAnswers[index] === item.answer) {
+                    correctCount++;
+                } else {
+                    wrongList.push({
+                        q: item.q,
+                        yourAnswer: userAnswers[index] !== null ? item.options[userAnswers[index]] : '（未作答）',
+                        correctAnswer: item.options[item.answer]
+                    });
+                }
+            });
+
+            const score = Math.round((correctCount / quizData.length) * 100);
+
+            document.getElementById('quiz-card').style.display = 'none';
+            const resultCard = document.getElementById('result-card');
+            resultCard.style.display = 'block';
+            document.getElementById('final-score').innerText = score + ' 分';
+
+            // 评语
+            let desc = '';
+            const percentage = correctCount / quizData.length;
+            if (percentage <= 0.3) desc = '看来你对 ACGN 的了解还不够深哦，快去社史页面补补课吧！';
+            else if (percentage <= 0.6) desc = '不错，你已经是一名合格的科高樱花了！';
+            else if (percentage <= 0.8) desc = '哇，资深社员！你对二次元的爱令人感动。';
+            else desc = '🎉 骨灰级元老！你就是樱花社的活字典！';
+            document.getElementById('result-desc').innerText = `答对 ${correctCount} / ${quizData.length} 题。${desc}`;
+
+            // 如果有答错的题，展示错题解析
+            if (wrongList.length > 0) {
+                let wrongHtml = '<div style="margin-top: 30px; text-align: left;"><h3 style="color: var(--sakura-dark); font-size: 1.1rem; margin-bottom: 12px;">📝 错题回顾</h3>';
+                wrongList.forEach((w, i) => {
+                    wrongHtml += `<div style="background: rgba(255,183,197,0.15); padding: 12px 15px; border-radius: 10px; margin-bottom: 8px; font-size: 0.9rem;">
+                        <p style="font-weight: 600; margin-bottom: 6px;">${i + 1}. ${w.q}</p>
+                        <p style="color: #c94b5b;">你的答案：${w.yourAnswer}</p>
+                        <p style="color: #2a9d8f;">正确答案：${w.correctAnswer}</p>
+                    </div>`;
+                });
+                wrongHtml += '</div>';
+                document.getElementById('result-desc').innerHTML += wrongHtml;
+            }
+        }
+
+        // 樱花飘落
+        const sakuraBg = document.getElementById('sakura-bg');
+        for (let i = 0; i < 30; i++) {
+            const sakura = document.createElement('div');
+            sakura.classList.add('sakura');
+            const size = Math.random() * 12 + 6;
+            sakura.style.width = size + 'px';
+            sakura.style.height = size + 'px';
+            sakura.style.left = Math.random() * 100 + 'vw';
+            sakura.style.animationDuration = (Math.random() * 5 + 8) + 's';
+            sakura.style.animationDelay = Math.random() * 5 + 's';
+            sakuraBg.appendChild(sakura);
+        }
+
+        // 页面加载时执行
+        loadQuiz();
+    </script>
+    <script src="../static/music-player.js" data-src="../static/music/music.mp3"></script>
+</body>
+</html>
