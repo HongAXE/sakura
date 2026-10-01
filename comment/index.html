@@ -7,7 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="../static/sakura.css">
     <style>
-        /* 留言板局部样式 */
         .comment-container {
             max-width: 720px;
             margin: 100px auto 60px;
@@ -146,7 +145,6 @@
     </div>
 
     <script>
-        // 注意：变量名改为 supabaseClient，避免和 SDK 全局变量冲突
         const supabaseClient = supabase.createClient(
             'https://gkkpmsghlxyjfccuuqha.supabase.co',
             'sb_publishable_G_yfJ_sDdHZhRTeOxCIEHA_rQhgFkKG'
@@ -155,12 +153,15 @@
         let currentUser = null;
         let existingComment = null;
 
-        // 登录
         async function signInWithGitHub() {
-            await supabaseClient.auth.signInWithOAuth({ provider: 'github' });
+            await supabaseClient.auth.signInWithOAuth({
+                provider: 'github',
+                options: {
+                    redirectTo: 'https://hongaxe.github.io/sakura/comment/'
+                }
+            });
         }
 
-        // 退出
         async function signOut() {
             await supabaseClient.auth.signOut();
             currentUser = null;
@@ -168,17 +169,6 @@
             render();
         }
 
-        // 检查登录状态
-        async function checkAuth() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            currentUser = user;
-            if (currentUser) {
-                await loadMyComment();
-            }
-            render();
-        }
-
-        // 加载当前用户的留言
         async function loadMyComment() {
             if (!currentUser) return;
             const { data } = await supabaseClient
@@ -189,7 +179,6 @@
             existingComment = data;
         }
 
-        // 提交或更新留言
         async function submitComment() {
             const content = document.getElementById('comment-input').value.trim();
             if (!content) {
@@ -198,13 +187,11 @@
             }
 
             if (existingComment) {
-                // 更新
                 const { error } = await supabaseClient.from('comments')
                     .update({ content, updated_at: new Date() })
                     .eq('user_id', currentUser.id);
                 if (error) { alert('更新失败：' + error.message); return; }
             } else {
-                // 插入
                 const { error } = await supabaseClient.from('comments').insert({
                     user_id: currentUser.id,
                     username: currentUser.user_metadata.user_name,
@@ -217,7 +204,6 @@
             render();
         }
 
-        // 渲染界面
         function render() {
             const authSection = document.getElementById('auth-section');
             if (currentUser) {
@@ -239,14 +225,12 @@
                     document.getElementById('comment-input').value = '';
                     document.getElementById('submit-btn').textContent = '提交留言';
                 }
-                loadAllComments();
             } else {
                 commentSection.style.display = 'none';
-                loadAllComments();
             }
+            loadAllComments();
         }
 
-        // 加载所有留言
         async function loadAllComments() {
             const { data, error } = await supabaseClient
                 .from('comments')
@@ -254,7 +238,7 @@
                 .order('updated_at', { ascending: false });
             if (error) {
                 document.getElementById('comment-display').innerHTML =
-                    '<p style="text-align:center;color:#e05a6d;">留言加载失败</p>';
+                    '<p style="text-align:center;color:#e05a6d;">留言加载失败：' + error.message + '</p>';
                 return;
             }
             if (!data || data.length === 0) {
@@ -273,8 +257,30 @@
             ).join('');
         }
 
+        // ===== 关键修复：监听认证状态变化 =====
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            console.log('Auth event:', event);
+            if (session) {
+                currentUser = session.user;
+                await loadMyComment();
+            } else {
+                currentUser = null;
+                existingComment = null;
+            }
+            render();
+        });
+
         // 初始化
-        checkAuth();
+        async function init() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                await loadMyComment();
+            }
+            render();
+        }
+        init();
+
         document.getElementById('submit-btn').addEventListener('click', submitComment);
     </script>
 </body>
