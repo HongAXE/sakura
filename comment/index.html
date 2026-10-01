@@ -2,23 +2,153 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>留言板 · 科高樱花社</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="static/sakura.css">
+    <link rel="stylesheet" href="../static/sakura.css">
+    <style>
+        /* 留言板局部样式 */
+        .comment-container {
+            max-width: 720px;
+            margin: 100px auto 60px;
+            padding: 0 20px;
+        }
+        .comment-card {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 24px;
+            padding: 32px 28px;
+            box-shadow: 0 10px 30px rgba(224, 90, 109, 0.1);
+        }
+        .comment-card h1 {
+            text-align: center;
+            color: var(--sakura-dark, #e05a6d);
+            margin-bottom: 24px;
+            font-size: 1.8rem;
+        }
+        #auth-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #comment-input {
+            width: 100%;
+            min-height: 90px;
+            padding: 12px 14px;
+            border: 1px solid #ffb7c5;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: #fff;
+            resize: vertical;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+        }
+        #comment-input:focus {
+            outline: none;
+            border-color: #e05a6d;
+            box-shadow: 0 0 0 3px rgba(224, 90, 109, 0.1);
+        }
+        #submit-btn {
+            display: block;
+            margin: 0 auto;
+            padding: 10px 32px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #e05a6d, #c94b5b);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        #submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(224, 90, 109, 0.3);
+        }
+        #comment-display {
+            margin-top: 30px;
+        }
+        .comment-item {
+            display: flex;
+            gap: 12px;
+            padding: 14px 16px;
+            background: #fdf2f4;
+            border-radius: 14px;
+            margin-bottom: 10px;
+            align-items: flex-start;
+        }
+        .comment-item img {
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .comment-item strong {
+            color: #e05a6d;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+        .comment-item p {
+            color: #333;
+            margin: 0;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        .login-btn {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #e05a6d, #c94b5b);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(224, 90, 109, 0.3);
+        }
+        .logout-btn {
+            padding: 6px 18px;
+            border: 1px solid #ffb7c5;
+            border-radius: 20px;
+            background: transparent;
+            color: #e05a6d;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .back-home-btn {
+            display: inline-block;
+            margin-top: 20px;
+            color: #e05a6d;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-home-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <div id="auth-section"></div>
-        <div id="comment-section">
-            <textarea id="comment-input" placeholder="写下你的留言..."></textarea>
-            <button id="submit-btn">提交</button>
+    <div class="comment-container">
+        <div class="comment-card">
+            <h1>🌸 留言板</h1>
+            <div id="auth-section"></div>
+            <div id="comment-section" style="display: none;">
+                <textarea id="comment-input" placeholder="写下你的留言..."></textarea>
+                <button id="submit-btn">提交留言</button>
+            </div>
             <div id="comment-display"></div>
+            <div style="text-align:center;">
+                <a href="../" class="back-home-btn">← 返回主页</a>
+            </div>
         </div>
     </div>
 
     <script>
-        const supabase = supabase.createClient(
-            'https://gkkpmsghlxyjfccuuqha.supabase.co/rest/v1/',
+        // 注意：变量名改为 supabaseClient，避免和 SDK 全局变量冲突
+        const supabaseClient = supabase.createClient(
+            'https://gkkpmsghlxyjfccuuqha.supabase.co',
             'sb_publishable_G_yfJ_sDdHZhRTeOxCIEHA_rQhgFkKG'
         );
 
@@ -27,45 +157,61 @@
 
         // 登录
         async function signInWithGitHub() {
-            await supabase.auth.signInWithOAuth({ provider: 'github' });
+            await supabaseClient.auth.signInWithOAuth({ provider: 'github' });
+        }
+
+        // 退出
+        async function signOut() {
+            await supabaseClient.auth.signOut();
+            currentUser = null;
+            existingComment = null;
+            render();
         }
 
         // 检查登录状态
         async function checkAuth() {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await supabaseClient.auth.getUser();
             currentUser = user;
+            if (currentUser) {
+                await loadMyComment();
+            }
             render();
         }
 
         // 加载当前用户的留言
         async function loadMyComment() {
             if (!currentUser) return;
-            const { data } = await supabase
+            const { data } = await supabaseClient
                 .from('comments')
                 .select('*')
                 .eq('user_id', currentUser.id)
-                .single();
+                .maybeSingle();
             existingComment = data;
         }
 
         // 提交或更新留言
         async function submitComment() {
             const content = document.getElementById('comment-input').value.trim();
-            if (!content) return;
+            if (!content) {
+                alert('留言内容不能为空哦～');
+                return;
+            }
 
             if (existingComment) {
                 // 更新
-                await supabase.from('comments')
+                const { error } = await supabaseClient.from('comments')
                     .update({ content, updated_at: new Date() })
                     .eq('user_id', currentUser.id);
+                if (error) { alert('更新失败：' + error.message); return; }
             } else {
                 // 插入
-                await supabase.from('comments').insert({
+                const { error } = await supabaseClient.from('comments').insert({
                     user_id: currentUser.id,
                     username: currentUser.user_metadata.user_name,
                     avatar_url: currentUser.user_metadata.avatar_url,
                     content
                 });
+                if (error) { alert('提交失败：' + error.message); return; }
             }
             await loadMyComment();
             render();
@@ -73,16 +219,16 @@
 
         // 渲染界面
         function render() {
-            // 登录状态
             const authSection = document.getElementById('auth-section');
             if (currentUser) {
-                authSection.innerHTML = `<p>已登录：${currentUser.user_metadata.user_name}</p>
-                    <button onclick="signOut()">退出</button>`;
+                authSection.innerHTML = `<p style="color:#666;font-size:0.9rem;margin-bottom:8px;">
+                    已登录：<strong style="color:#e05a6d;">${currentUser.user_metadata.user_name}</strong>
+                    <button class="logout-btn" onclick="signOut()">退出</button>
+                </p>`;
             } else {
-                authSection.innerHTML = `<button onclick="signInWithGitHub()">使用 GitHub 登录</button>`;
+                authSection.innerHTML = `<button class="login-btn" onclick="signInWithGitHub()">🐙 使用 GitHub 登录</button>`;
             }
 
-            // 留言区域
             const commentSection = document.getElementById('comment-section');
             if (currentUser) {
                 commentSection.style.display = 'block';
@@ -96,29 +242,35 @@
                 loadAllComments();
             } else {
                 commentSection.style.display = 'none';
+                loadAllComments();
             }
         }
 
-        // 加载所有留言展示
+        // 加载所有留言
         async function loadAllComments() {
-            const { data } = await supabase
+            const { data, error } = await supabaseClient
                 .from('comments')
                 .select('*')
                 .order('updated_at', { ascending: false });
+            if (error) {
+                document.getElementById('comment-display').innerHTML =
+                    '<p style="text-align:center;color:#e05a6d;">留言加载失败</p>';
+                return;
+            }
+            if (!data || data.length === 0) {
+                document.getElementById('comment-display').innerHTML =
+                    '<p style="text-align:center;color:#999;">还没有留言，来抢沙发吧～</p>';
+                return;
+            }
             document.getElementById('comment-display').innerHTML = data.map(c =>
                 `<div class="comment-item">
-                    <img src="${c.avatar_url}" width="32" height="32" style="border-radius:50%">
-                    <strong>${c.username}</strong>
-                    <p>${c.content}</p>
+                    <img src="${c.avatar_url}" width="36" height="36" alt="avatar">
+                    <div style="flex:1;min-width:0;">
+                        <strong>${c.username}</strong>
+                        <p>${c.content}</p>
+                    </div>
                 </div>`
             ).join('');
-        }
-
-        async function signOut() {
-            await supabase.auth.signOut();
-            currentUser = null;
-            existingComment = null;
-            render();
         }
 
         // 初始化
