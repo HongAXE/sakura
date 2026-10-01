@@ -22,37 +22,11 @@ body {
     flex-direction: column;
 }
 
-/* ===== 导航栏 ===== */
-nav {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    z-index: 100;
-}
+/* ============================================================
+   一、全局元素
+   ============================================================ */
 
-nav a {
-    color: var(--text-sub);
-    text-decoration: none;
-    font-weight: 600;
-    padding: 5px 15px;
-    border-radius: 20px;
-    transition: all 0.3s;
-}
-
-nav a:hover,
-nav a.active {
-    background: var(--sakura-dark);
-    color: white;
-}
-
-/* ===== 页脚 ===== */
+/* 页脚 */
 footer {
     text-align: center;
     padding: 30px;
@@ -61,7 +35,7 @@ footer {
     margin-top: auto;
 }
 
-/* ===== 主页特有样式 ===== */
+/* 樱花飘落背景 */
 .sakura-bg {
     position: fixed;
     top: 0;
@@ -86,6 +60,93 @@ footer {
     100% { transform: translateY(110vh) rotate(360deg); }
 }
 
+/* 通用内容容器（社史 / 小测试 / 链接页共用） */
+.container {
+    max-width: 800px;
+    margin: 100px auto 0;
+    padding: 0 20px;
+    flex: 1;
+    width: 100%;
+}
+
+/* 通用页面标题 */
+.page-title {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.page-title h1 {
+    font-size: 2.5rem;
+    color: var(--sakura-dark);
+    margin-bottom: 10px;
+}
+
+.page-title p { color: var(--text-sub); }
+
+/* 返回主页悬浮按钮（子页面共用） */
+.back-home {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    color: var(--sakura-dark);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(224, 90, 109, 0.15);
+    transition: all 0.3s;
+    border: 1px solid var(--sakura-pink);
+    font-size: 0.9rem;
+}
+
+.back-home:hover {
+    background: var(--sakura-dark);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(224, 90, 109, 0.3);
+}
+
+/* 背景音乐开关 */
+#music-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 1px solid var(--sakura-pink);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    color: var(--sakura-dark);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(224, 90, 109, 0.15);
+    transition: all 0.3s;
+}
+
+#music-toggle:hover {
+    background: var(--sakura-dark);
+    color: white;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(224, 90, 109, 0.3);
+}
+
+#music-toggle.muted {
+    opacity: 0.6;
+}
+
+
+/* ============================================================
+   二、主页样式
+   ============================================================ */
+
 .hero {
     position: relative;
     z-index: 1;
@@ -95,7 +156,7 @@ footer {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 100px 20px 40px;
+    padding: 120px 20px 40px; /* 覆盖基础 padding-top */
 }
 
 .hero-badge {
@@ -125,39 +186,31 @@ footer {
     margin-bottom: 40px;
 }
 
-.logo-container {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    flex-wrap: wrap;
-    margin-bottom: 40px;
+/* 社徽 Logo */
+.logo-wrapper {
+    margin-bottom: 25px;
+    display: inline-block;
+    position: relative;
 }
 
-.logo-item {
-    background: var(--card-bg);
-    backdrop-filter: blur(8px);
-    padding: 20px;
-    border-radius: 20px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-    transition: transform 0.3s;
+.logo-wrapper img {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: #ffffff;
+    padding: 15px;
+    box-shadow: 0 10px 35px rgba(224, 90, 109, 0.25);
+    transition: all 0.4s ease;
+    border: 2px solid rgba(255, 183, 197, 0.5);
 }
 
-.logo-item:hover { transform: translateY(-5px); }
-
-.logo-item img {
-    max-width: 180px;
-    height: auto;
-    display: block;
-    margin: 0 auto 10px;
-    border-radius: 10px;
+.logo-wrapper img:hover {
+    transform: scale(1.05) rotate(5deg);
+    box-shadow: 0 15px 45px rgba(224, 90, 109, 0.35);
 }
 
-.logo-item span {
-    font-size: 0.9rem;
-    color: var(--text-sub);
-    font-weight: 500;
-}
-
+/* 快捷入口 */
 .quick-nav {
     display: flex;
     gap: 20px;
@@ -166,6 +219,9 @@ footer {
     z-index: 1;
     position: relative;
     margin-bottom: 60px;
+    width: 100%;
+    max-width: 800px;
+    padding: 0 20px;
 }
 
 .btn-card {
@@ -173,15 +229,18 @@ footer {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 200px;
-    height: 120px;
+    flex: 1;
+    min-width: 260px;
+    max-width: 360px;
+    height: 140px;
     background: white;
-    border-radius: 20px;
+    border-radius: 24px;
     text-decoration: none;
     color: var(--text-main);
     box-shadow: 0 8px 20px rgba(224, 90, 109, 0.1);
     transition: all 0.3s;
     border: 2px solid transparent;
+    padding: 20px;
 }
 
 .btn-card:hover {
@@ -189,30 +248,47 @@ footer {
     transform: scale(1.05);
 }
 
-.btn-card .icon { font-size: 2rem; margin-bottom: 10px; }
-.btn-card span { font-weight: 600; color: var(--sakura-dark); }
+.btn-card .icon { font-size: 2.5rem; margin-bottom: 12px; }
+.btn-card span { font-weight: 600; color: var(--sakura-dark); font-size: 1.15rem; }
 
-/* ===== 社史页特有样式 ===== */
-.container {
-    max-width: 800px;
-    margin: 100px auto 0;
-    padding: 0 20px;
-    flex: 1;
-    width: 100%;
+/* S.O.S. 团致敬 */
+.sos-tribute {
+    margin-top: 10px;
+    margin-bottom: 40px;
+    padding: 16px 26px;
+    background: rgba(255, 183, 197, 0.12);
+    border-left: 3px solid var(--sakura-pink);
+    border-radius: 10px;
+    text-align: left;
+    max-width: 520px;
+    display: inline-block;
 }
 
-.page-title {
-    text-align: center;
-    margin-bottom: 50px;
-}
-
-.page-title h1 {
-    font-size: 2.5rem;
+.sos-line1 {
+    font-size: 0.95rem;
     color: var(--sakura-dark);
-    margin-bottom: 10px;
+    font-weight: 700;
+    margin-bottom: 8px;
 }
 
-.page-title p { color: var(--text-sub); }
+.sos-line2 {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+    font-style: italic;
+    letter-spacing: 0.3px;
+    margin-bottom: 5px;
+    word-break: break-word;
+}
+
+.sos-line3 {
+    font-size: 0.85rem;
+    color: var(--text-sub);
+}
+
+
+/* ============================================================
+   三、社史页样式
+   ============================================================ */
 
 .timeline {
     position: relative;
@@ -286,13 +362,28 @@ footer {
     font-weight: 600;
 }
 
+/* 社史图片 */
 .history-img {
     max-width: 100%;
-    border-radius: 10px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     margin-top: 15px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: block;
 }
 
+.history-img-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.history-img-grid .history-img {
+    margin-top: 0;
+}
+
+/* 附录表格 */
 .appendix {
     margin-top: 60px;
     background: white;
@@ -330,7 +421,11 @@ footer {
 
 .appendix tr:hover { background-color: #fdf2f4; }
 
-/* ===== 小测试页特有样式 ===== */
+
+/* ============================================================
+   四、小测试页样式
+   ============================================================ */
+
 .quiz-card {
     background: var(--card-bg);
     border-radius: 24px;
@@ -345,7 +440,29 @@ footer {
     font-size: 1.8rem;
 }
 
-.question { margin-bottom: 25px; }
+/* 进度显示 */
+.progress-bar {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-sub);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.progress-bar .current {
+    color: var(--sakura-dark);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* 单题卡片 */
+.question {
+    margin-bottom: 25px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
 
 .question p {
     font-weight: 600;
@@ -380,6 +497,7 @@ footer {
     accent-color: var(--sakura-dark);
 }
 
+/* 通用提交按钮 */
 .btn-submit {
     width: 100%;
     padding: 15px;
@@ -400,48 +518,214 @@ footer {
     box-shadow: 0 6px 15px rgba(224, 90, 109, 0.3);
 }
 
+/* 上一题 / 下一题按钮 */
+.nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.btn-nav {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid var(--sakura-pink);
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--sakura-dark);
+    border-radius: 15px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+
+.btn-nav:hover:not(:disabled) {
+    background: var(--sakura-pink);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(224, 90, 109, 0.2);
+}
+
+.btn-nav:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+/* 淡入动画 */
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* 结果页 */
 .result { text-align: center; display: none; }
 .result h2 { color: var(--sakura-dark); font-size: 2rem; margin-bottom: 15px; }
 .result p { font-size: 1.1rem; color: var(--text-sub); line-height: 1.6; margin-bottom: 20px; }
 .result .score { font-size: 3rem; color: var(--sakura-dark); font-weight: bold; }
 
-/* ===== 响应式 ===== */
-@media (max-width: 600px) {
-    .hero h1 { font-size: 2.2rem; }
-    .page-title h1 { font-size: 2rem; }
-    .logo-container { gap: 20px; }
-    .logo-item img { max-width: 120px; }
+.result-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-/* ===== 背景音乐开关 ===== */
-#music-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    border: 1px solid var(--sakura-pink);
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(8px);
+.result-buttons .btn-submit {
+    flex: 1;
+    min-width: 140px;
+}
+
+/* 次级按钮（再测一次旁边的“看看社史”） */
+.btn-outline {
+    background: rgba(255, 255, 255, 0.6);
     color: var(--sakura-dark);
-    font-size: 1.2rem;
-    cursor: pointer;
+    border: 1px solid var(--sakura-pink);
+}
+
+.btn-outline:hover {
+    background: var(--sakura-pink);
+    color: white;
+}
+
+
+/* ============================================================
+   五、相关链接页样式
+   ============================================================ */
+
+.link-section {
+    margin-bottom: 50px;
+}
+
+.link-section-title {
+    font-size: 1.4rem;
+    color: var(--sakura-dark);
+    margin-bottom: 20px;
+    padding-left: 12px;
+    border-left: 4px solid var(--sakura-pink);
+    font-weight: 700;
+}
+
+.link-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+.link-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 22px;
+    background: var(--card-bg);
+    border-radius: 20px;
+    text-decoration: none;
+    color: var(--text-main);
+    box-shadow: 0 6px 20px rgba(224, 90, 109, 0.08);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.link-card:hover {
+    border-color: var(--sakura-pink);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(224, 90, 109, 0.18);
+}
+
+.link-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--sakura-pink);
+    transform: scaleY(0);
+    transition: transform 0.3s;
+    transform-origin: top;
+}
+
+.link-card:hover::before {
+    transform: scaleY(1);
+}
+
+.link-icon {
+    font-size: 2rem;
+    width: 52px;
+    height: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(224, 90, 109, 0.15);
+    background: rgba(255, 183, 197, 0.2);
+    border-radius: 14px;
+    flex-shrink: 0;
     transition: all 0.3s;
 }
 
-#music-toggle:hover {
-    background: var(--sakura-dark);
-    color: white;
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 20px rgba(224, 90, 109, 0.3);
+.link-card:hover .link-icon {
+    background: rgba(255, 183, 197, 0.4);
+    transform: scale(1.08);
 }
 
-#music-toggle.muted {
-    opacity: 0.6;
+.link-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.link-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--sakura-dark);
+    margin-bottom: 4px;
+}
+
+.link-desc {
+    font-size: 0.82rem;
+    color: var(--text-sub);
+    line-height: 1.4;
+}
+
+.link-arrow {
+    color: var(--sakura-pink);
+    font-size: 1.2rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+}
+
+.link-card:hover .link-arrow {
+    transform: translateX(4px);
+    color: var(--sakura-dark);
+}
+
+
+/* ============================================================
+   六、响应式
+   ============================================================ */
+
+@media (max-width: 600px) {
+    .hero { padding-top: 80px; }
+    .hero h1 { font-size: 2.2rem; }
+    .page-title h1 { font-size: 2rem; }
+    .logo-wrapper img { width: 130px; height: 130px; padding: 10px; }
+    .btn-card { min-width: 100%; height: 110px; }
+    .sos-tribute {
+        padding: 12px 18px;
+        margin-bottom: 30px;
+    }
+    .sos-line1 { font-size: 0.9rem; }
+    .sos-line2 { font-size: 0.72rem; }
+    .sos-line3 { font-size: 0.8rem; }
+    .history-img-grid {
+        grid-template-columns: 1fr;
+    }
+    .link-grid {
+        grid-template-columns: 1fr;
+    }
+    .link-card {
+        padding: 16px 18px;
+    }
 }
