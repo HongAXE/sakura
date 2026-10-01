@@ -24,6 +24,7 @@
 | 📜 **社史** | 时间线形式记录 2013 年至今的重要事件，配有历史图片与历届干部名单 |
 | 🎯 **小测试** | 从 100+ 道 ACGN 题库中随机抽取 15 题，支持上一题/下一题导航、错题回顾与评分 |
 | 📁 **相关链接** | 樱花社衍生平台（QQ 群、贴吧、微博）与友情站点（科外所、开发者主页） |
+| 💬 **留言板** | 使用 GitHub 账号登录，每人限一条留言，可修改自己的留言（基于 Supabase） |
 | 🎵 **背景音乐** | 进入页面自动尝试播放，右上角悬浮开关，支持跨页续播与状态记忆 |
 | 🌸 **樱花飘落** | 全站淡粉色樱花飘落动画，增强视觉氛围 |
 | 👀 **访问统计** | 页脚展示本站总访问量（基于 Vercount 服务） |
@@ -43,6 +44,8 @@ Sakura/
 ├── quiz/
 │   ├── index.html
 │   └── qna.txt
+├── comment/
+│   └── index.html
 ├── static/
 │   ├── image/
 │   │   ├── intro-2014.png
@@ -55,9 +58,7 @@ Sakura/
 │   ├── music/
 │   │   └── music.mp3
 │   ├── music-player.js
-│   ├── sakura.css
-│   ├── sakura.css.bak
-│   └── 樱花社社史.docx
+│   └── sakura.css
 ├── index.html
 ├── LICENSE
 └── README.md
@@ -89,54 +90,13 @@ Sakura/
 - **纯静态**：HTML5 + CSS3 + 原生 JavaScript，无框架依赖
 - **字体**：系统默认字体栈，保证跨平台显示一致
 - **背景音乐**：HTML5 Audio API，配合 localStorage 实现跨页续播
+- **认证与数据库**：Supabase（GitHub OAuth + PostgreSQL）
 - **访问统计**：Vercount
 - **动画**：CSS Keyframes 实现樱花飘落与加载动画
 - **部署**：GitHub Pages
 
 ---
 
-## 🚀 本地运行
-
-1. 克隆或下载本仓库到本地：
-   ```
-   git clone https://github.com/HongAXE/sakura.git
-   cd sakura
-   ```
-
-2. 直接双击打开 index.html 即可浏览主页。
-3. 由于小测试页使用了 fetch 读取 qna.txt，直接双击打开会被浏览器的本地文件安全策略拦截。建议使用本地服务器预览：
-   ```
-   # 若已安装 Python 3
-   python -m http.server 8000
-   ```
-   然后在浏览器中访问 http://localhost:8000/。
-
----
-
-## 🌐 部署到 GitHub Pages
-
-1. 将整个 Sakura/ 目录推送到 GitHub 仓库（可以是独立仓库，也可以是子目录）。
-2. 进入仓库的 Settings → Pages。
-3. 在 Source 中选择 main 分支和 /（根目录）或 /docs（若你放在 docs 目录下）。
-4. 保存后等待 1~2 分钟，访问 https://<你的用户名>.github.io/<仓库名>/ 即可。
-
-本网站当前部署地址：https://hongaxe.github.io/sakura/
-
----
-
-## 📝 自定义与维护
-
-| 想修改的内容 | 对应文件 |
-|------|------|
-| 社团简介、快捷入口 | index.html |
-| 社史时间线、图片 | history/index.html |
-| 小测试题目 | quiz/qna.txt |
-| 相关链接、QQ 群号 | links/index.html |
-| 全站配色、按钮风格 | static/sakura.css |
-| 背景音乐 | static/music/music.mp3 |
-| 樱花飘落数量与速度 | 各页面底部的 sakuraBg 脚本 |
-
----
 
 ## 🤝 贡献与反馈
 
