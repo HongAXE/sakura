@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>留言板 · 科高樱花社</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="auth-section"></div>
+        <div id="comment-section">
+            <textarea id="comment-input" placeholder="写下你的留言..."></textarea>
+            <button id="submit-btn">提交</button>
+            <div id="comment-display"></div>
+        </div>
+    </div>
+
+    <script>
+        const supabase = supabase.createClient(
+            'https://gkkpmsghlxyjfccuuqha.supabase.co/rest/v1/',
+            'sb_publishable_G_yfJ_sDdHZhRTeOxCIEHA_rQhgFkKG'
+        );
+
+        let currentUser = null;
+        let existingComment = null;
+
+        // 登录
+        async function signInWithGitHub() {
+            await supabase.auth.signInWithOAuth({ provider: 'github' });
+        }
+
+        // 检查登录状态
+        async function checkAuth() {
+            const { data: { user } } = await supabase.auth.getUser();
+            currentUser = user;
+            render();
+        }
+
+        // 加载当前用户的留言
+        async function loadMyComment() {
+            if (!currentUser) return;
+            const { data } = await supabase
+                .from('comments')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .single();
+            existingComment = data;
+        }
+
+        // 提交或更新留言
+        async function submitComment() {
+            const content = document.getElementById('comment-input').value.trim();
+            if (!content) return;
+
+            if (existingComment) {
+                // 更新
+                await supabase.from('comments')
+                    .update({ content, updated_at: new Date() })
+                    .eq('user_id', currentUser.id);
+            } else {
+                // 插入
+                await supabase.from('comments').insert({
+                    user_id: currentUser.id,
+                    username: currentUser.user_metadata.user_name,
+                    avatar_url: currentUser.user_metadata.avatar_url,
+                    content
+                });
+            }
+            await loadMyComment();
+            render();
+        }
+
+        // 渲染界面
+        function render() {
+            // 登录状态
+            const authSection = document.getElementById('auth-section');
+            if (currentUser) {
+                authSection.innerHTML = `<p>已登录：${currentUser.user_metadata.user_name}</p>
+                    <button onclick="signOut()">退出</button>`;
+            } else {
+                authSection.innerHTML = `<button onclick="signInWithGitHub()">使用 GitHub 登录</button>`;
+            }
+
+            // 留言区域
+            const commentSection = document.getElementById('comment-section');
+            if (currentUser) {
+                commentSection.style.display = 'block';
+                if (existingComment) {
+                    document.getElementById('comment-input').value = existingComment.content;
+                    document.getElementById('submit-btn').textContent = '更新留言';
+                } else {
+                    document.getElementById('comment-input').value = '';
+                    document.getElementById('submit-btn').textContent = '提交留言';
+                }
+                loadAllComments();
+            } else {
+                commentSection.style.display = 'none';
+            }
+        }
+
+        // 加载所有留言展示
+        async function loadAllComments() {
+            const { data } = await supabase
+                .from('comments')
+                .select('*')
+                .order('updated_at', { ascending: false });
+            document.getElementById('comment-display').innerHTML = data.map(c =>
+                `<div class="comment-item">
+                    <img src="${c.avatar_url}" width="32" height="32" style="border-radius:50%">
+                    <strong>${c.username}</strong>
+                    <p>${c.content}</p>
+                </div>`
+            ).join('');
+        }
+
+        async function signOut() {
+            await supabase.auth.signOut();
+            currentUser = null;
+            existingComment = null;
+            render();
+        }
+
+        // 初始化
+        checkAuth();
+        document.getElementById('submit-btn').addEventListener('click', submitComment);
+    </script>
+</body>
+</html>
