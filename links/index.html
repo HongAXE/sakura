@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>相关链接 · 科高樱花社</title>
+    <link rel="stylesheet" href="../static/sakura.css">
+</head>
+<body>
+    <div class="sakura-bg" id="sakura-bg"></div>
+    <a href="../" class="back-home">← 返回主页</a>
+
+    <div class="container">
+        <div class="page-title">
+            <h1>相关链接</h1>
+            <p>樱花社衍生平台 & 友情站点</p>
+        </div>
+
+        <!-- 衍生平台 -->
+        <div class="link-section">
+            <div class="link-section-title">🌸 衍生平台</div>
+            <div class="link-grid">
+                <!-- 社群审核 QQ -->
+                <a href="http://1704475894.qzone.qq.com/" target="_blank" rel="noopener" class="link-card">
+                    <div class="link-icon">💬</div>
+                    <div class="link-info">
+                        <div class="link-name">社群审核 QQ</div>
+                        <div class="link-desc">加入樱花社官方 QQ 群</div>
+                    </div>
+                    <div class="link-arrow">→</div>
+                </a>
+
+                <!-- 樱花社贴吧 -->
+                <a href="https://tieba.baidu.com/f?kw=%E6%B7%B1%E5%9C%B3%E7%A7%91%E9%AB%98%E6%A8%B1%E8%8A%B1%E7%A4%BE#/" target="_blank" rel="noopener" class="link-card">
+                    <div class="link-icon">📌</div>
+                    <div class="link-info">
+                        <div class="link-name">樱花社贴吧</div>
+                        <div class="link-desc">深圳科高樱花社吧 · 历史与交流</div>
+                    </div>
+                    <div class="link-arrow">→</div>
+                </a>
+
+                <!-- 樱花社微博 -->
+                <a href="https://weibo.com/u/3810142665" target="_blank" rel="noopener" class="link-card">
+                    <div class="link-icon">📢</div>
+                    <div class="link-info">
+                        <div class="link-name">樱花社微博</div>
+                        <div class="link-desc">官方微博 · 活动动态</div>
+                    </div>
+                    <div class="link-arrow">→</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 相关信息 -->
+        <div class="link-section">
+            <div class="link-section-title">🔗 友情站点</div>
+            <div class="link-grid">
+                <!-- 科外所主页 -->
+                <a href="https://hongaxe.github.io/work/3" target="_blank" rel="noopener" class="link-card">
+                    <div class="link-icon">🛸</div>
+                    <div class="link-info">
+                        <div class="link-name">科外所主页</div>
+                        <div class="link-desc">科高外星人研究所 · KGRI</div>
+                    </div>
+                    <div class="link-arrow">→</div>
+                </a>
+
+                <!-- 开发者主页 -->
+                <a href="https://hongaxe.github.io" target="_blank" rel="noopener" class="link-card">
+                    <div class="link-icon">👤</div>
+                    <div class="link-info">
+                        <div class="link-name">开发者主页</div>
+                        <div class="link-desc">HongAX · 本网站开发者</div>
+                    </div>
+                    <div class="link-arrow">→</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 深圳科学高中樱花社 · 由 HongAX 开发<br>
+        本网站仅用于社团展示，素材版权归原作者所有
+    </footer>
+
+    <script>
+        const sakuraBg = document.getElementById('sakura-bg');
+        for (let i = 0; i < 30; i++) {
+            const sakura = document.createElement('div');
+            sakura.classList.add('sakura');
+            const size = Math.random() * 12 + 6;
+            sakura.style.width = size + 'px';
+            sakura.style.height = size + 'px';
+            sakura.style.left = Math.random() * 100 + 'vw';
+            sakura.style.animationDuration = (Math.random() * 5 + 8) + 's';
+            sakura.style.animationDelay = Math.random() * 5 + 's';
+            sakuraBg.appendChild(sakura);
+        }
+    </script>
+    <script src="../static/music-player.js" data-src="../static/music/music.mp3"></script>
+</body>
+</html>
