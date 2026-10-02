@@ -54,8 +54,15 @@
     <script>
         const params = new URLSearchParams(location.search);
         const mode = params.get('mode') === 'endless' ? 'endless' : 'normal';
+        const difficulty = params.get('difficulty') === 'hard' ? 'hard' : 'easy';   // ★ 新增
         const TOTAL = 15;
         const MAX_MISTAKES = 10;
+
+        // ★ 根据难度选择题库文件
+        const QNA_FILE = difficulty === 'hard' ? './qna-hard.txt' : './qna-easy.txt';
+
+        // 难度显示名
+        const DIFF_LABEL = difficulty === 'hard' ? '🔥 困难' : '🌸 简单';
 
         let quizData = [];
         let currentIndex = 0;
@@ -70,8 +77,8 @@
 
         // ===== 初始化 =====
         async function init() {
-            document.getElementById('mode-title').innerText =
-                mode === 'endless' ? '🔥 无尽模式' : '📖 普通模式';
+            const modeLabel = mode === 'endless' ? '无尽模式' : '普通模式';
+            document.getElementById('mode-title').innerText = `${DIFF_LABEL} · ${modeLabel}`;
 
             if (mode === 'endless') {
                 document.getElementById('progress-hud').style.display = 'none';
@@ -79,13 +86,11 @@
                 document.getElementById('mistake-hud').style.display = 'flex';
             }
 
-            // 检查登录
             const { data: { session } } = await supabaseClient.auth.getSession();
             currentUser = session ? session.user : null;
 
-            // 加载题库
             try {
-                const res = await fetch('./qna.txt');
+                const res = await fetch(QNA_FILE);
                 const text = await res.text();
                 let all = text.split('\n').filter(l => l.trim()).map(line => {
                     const p = line.split('|');
@@ -112,7 +117,7 @@
                 renderQuestion();
             } catch (e) {
                 document.getElementById('question-container').innerHTML =
-                    '<p style="text-align:center;color:#e05a6d;">❌ 题库加载失败，请检查网络或部署环境</p>';
+                    '<p style="text-align:center;color:#e05a6d;">❌ 题库加载失败，请检查题库文件路径</p>';
             }
         }
 
@@ -204,14 +209,8 @@
                 renderQuestion();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (mode === 'endless') {
-                if (mistakes >= MAX_MISTAKES) {
-                    submitQuiz();
-                    return;
-                }
-                if (currentIndex >= quizData.length - 1) {
-                    submitQuiz();
-                    return;
-                }
+                if (mistakes >= MAX_MISTAKES) { submitQuiz(); return; }
+                if (currentIndex >= quizData.length - 1) { submitQuiz(); return; }
                 currentIndex++;
                 renderQuestion();
             }
@@ -265,23 +264,22 @@
                 else if (p <= 0.8) desc = '哇，资深社员！你对二次元的爱令人感动。';
                 else desc = '🎉 骨灰级元老！你就是樱花社的活字典！';
                 document.getElementById('result-desc').innerText =
-                    `答对 ${correctCount} / ${quizData.length} 题，用时 ${formatTime(timeSeconds)}。${desc}`;
+                    `${DIFF_LABEL} · 答对 ${correctCount} / ${quizData.length} 题，用时 ${formatTime(timeSeconds)}。${desc}`;
             } else {
                 document.getElementById('result-desc').innerText =
-                    `答对 ${correctCount} 题，答错 ${mistakes} 题，用时 ${formatTime(timeSeconds)}。`;
+                    `${DIFF_LABEL} · 答对 ${correctCount} 题，答错 ${mistakes} 题，用时 ${formatTime(timeSeconds)}。`;
             }
 
-            // ===== 暂存本次成绩，供登录回来后自动提交 =====
+            // ★ 暂存成绩时带上难度
             localStorage.setItem('pending_score', JSON.stringify({
                 mode: mode,
+                difficulty: difficulty,
                 score: finalScore,
                 time_seconds: timeSeconds
             }));
 
-            // 成绩提交
             await handleScoreSubmit(finalScore, timeSeconds);
 
-            // 错题回顾（普通模式 + 无尽模式都显示）
             if (wrongList.length > 0) {
                 let html = '<div style="margin-top:24px;text-align:left;"><h3 style="color:var(--sakura-dark);font-size:1.05rem;margin-bottom:10px;">📝 错题回顾</h3>';
                 wrongList.forEach((w, i) => {
@@ -299,7 +297,6 @@
         async function handleScoreSubmit(score, timeSeconds) {
             const statusEl = document.getElementById('submit-status');
 
-            // 关键：提交前重新检查一次 session，防止 init 时未就绪
             if (!currentUser) {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session) currentUser = session.user;
@@ -313,11 +310,13 @@
             scoreSubmitted = true;
 
             try {
+                // ★ 查询时带上 difficulty
                 const { data: existing } = await supabaseClient
                     .from('scores')
                     .select('score, time_seconds')
                     .eq('user_id', currentUser.id)
                     .eq('mode', mode)
+                    .eq('difficulty', difficulty)
                     .maybeSingle();
 
                 const isBetter = !existing ||
@@ -333,15 +332,18 @@
                                 updated_at: new Date()
                             })
                             .eq('user_id', currentUser.id)
-                            .eq('mode', mode);
+                            .eq('mode', mode)
+                            .eq('difficulty', difficulty);
                         if (error) throw error;
                         statusEl.innerText = '✅ 已更新你的最佳成绩！';
                     } else {
+                        // ★ 插入时带上 difficulty
                         const { error } = await supabaseClient.from('scores').insert({
                             user_id: currentUser.id,
                             username: currentUser.user_metadata.user_name,
                             avatar_url: currentUser.user_metadata.avatar_url,
                             mode,
+                            difficulty,
                             score,
                             time_seconds: timeSeconds
                         });
@@ -354,28 +356,28 @@
                     localStorage.removeItem('pending_score');
                 }
             } catch (e) {
-                scoreSubmitted = false;  // 允许重试
+                scoreSubmitted = false;
                 statusEl.innerHTML = '⚠️ 成绩提交失败：' + e.message +
                     '<br><a href="javascript:void(0)" onclick="retrySubmit()" style="color:var(--sakura-dark);font-weight:600;">点此重试</a>';
             }
         }
 
-        // 新增：手动重试提交
         async function retrySubmit() {
             scoreSubmitted = false;
             const scoreText = document.getElementById('final-score').innerText.replace(' 分', '');
-            const timeSec = elapsedSeconds;
-            await handleScoreSubmit(parseInt(scoreText), timeSec);
+            await handleScoreSubmit(parseInt(scoreText), elapsedSeconds);
         }
 
         async function submitPendingScore(p) {
             if (!currentUser) return;
+            const diff = p.difficulty || 'easy';
 
             const { data: existing } = await supabaseClient
                 .from('scores')
                 .select('score, time_seconds')
                 .eq('user_id', currentUser.id)
                 .eq('mode', p.mode)
+                .eq('difficulty', diff)
                 .maybeSingle();
 
             const isBetter = !existing ||
@@ -391,13 +393,15 @@
                             updated_at: new Date()
                         })
                         .eq('user_id', currentUser.id)
-                        .eq('mode', p.mode);
+                        .eq('mode', p.mode)
+                        .eq('difficulty', diff);
                 } else {
                     await supabaseClient.from('scores').insert({
                         user_id: currentUser.id,
                         username: currentUser.user_metadata.user_name,
                         avatar_url: currentUser.user_metadata.avatar_url,
                         mode: p.mode,
+                        difficulty: diff,
                         score: p.score,
                         time_seconds: p.time_seconds
                     });
@@ -408,9 +412,7 @@
         async function signInWithGitHub() {
             await supabaseClient.auth.signInWithOAuth({
                 provider: 'github',
-                options: {
-                    redirectTo: location.href
-                }
+                options: { redirectTo: location.href }
             });
         }
 
@@ -424,15 +426,11 @@
             return m > 0 ? `${m}分${s}秒` : `${s}秒`;
         }
 
-        // ===== 初始化 =====
         init();
 
-        // 监听登录状态变化
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
-            console.log('Auth event:', event);
             if (session) {
                 currentUser = session.user;
-
                 const pending = localStorage.getItem('pending_score');
                 if (pending) {
                     try {
