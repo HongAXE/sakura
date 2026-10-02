@@ -22,6 +22,7 @@ body {
     flex-direction: column;
 }
 
+
 /* ============================================================
    一、全局元素
    ============================================================ */
@@ -56,11 +57,11 @@ footer {
 }
 
 @keyframes fall {
-    0% { transform: translateY(-10vh) rotate(0deg); }
+    0%   { transform: translateY(-10vh) rotate(0deg); }
     100% { transform: translateY(110vh) rotate(360deg); }
 }
 
-/* 通用内容容器（社史 / 小测试 / 链接页共用） */
+/* 通用内容容器 */
 .container {
     max-width: 800px;
     margin: 100px auto 0;
@@ -74,16 +75,14 @@ footer {
     text-align: center;
     margin-bottom: 50px;
 }
-
 .page-title h1 {
     font-size: 2.5rem;
     color: var(--sakura-dark);
     margin-bottom: 10px;
 }
-
 .page-title p { color: var(--text-sub); }
 
-/* 返回主页悬浮按钮（子页面共用） */
+/* 返回主页悬浮按钮 */
 .back-home {
     position: fixed;
     top: 20px;
@@ -101,7 +100,6 @@ footer {
     border: 1px solid var(--sakura-pink);
     font-size: 0.9rem;
 }
-
 .back-home:hover {
     background: var(--sakura-dark);
     color: white;
@@ -130,16 +128,26 @@ footer {
     box-shadow: 0 4px 15px rgba(224, 90, 109, 0.15);
     transition: all 0.3s;
 }
-
 #music-toggle:hover {
     background: var(--sakura-dark);
     color: white;
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 6px 20px rgba(224, 90, 109, 0.3);
 }
+#music-toggle.muted { opacity: 0.6; }
 
-#music-toggle.muted {
-    opacity: 0.6;
+/* 访问计数器 */
+.visit-counter {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: #8a8aa8;
+    letter-spacing: 0.3px;
+}
+.visit-counter #busuanzi_value_site_pv {
+    color: var(--sakura-dark);
+    font-weight: 700;
+    font-size: 0.9rem;
+    font-feature-settings: "tnum";
 }
 
 
@@ -156,7 +164,7 @@ footer {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 120px 20px 40px; /* 覆盖基础 padding-top */
+    padding: 120px 20px 40px;
 }
 
 .hero-badge {
@@ -186,13 +194,11 @@ footer {
     margin-bottom: 40px;
 }
 
-/* 社徽 Logo */
 .logo-wrapper {
     margin-bottom: 25px;
     display: inline-block;
     position: relative;
 }
-
 .logo-wrapper img {
     width: 160px;
     height: 160px;
@@ -204,13 +210,11 @@ footer {
     transition: all 0.4s ease;
     border: 2px solid rgba(255, 183, 197, 0.5);
 }
-
 .logo-wrapper img:hover {
     transform: scale(1.05) rotate(5deg);
     box-shadow: 0 15px 45px rgba(224, 90, 109, 0.35);
 }
 
-/* 快捷入口 */
 .quick-nav {
     display: flex;
     gap: 20px;
@@ -242,16 +246,13 @@ footer {
     border: 2px solid transparent;
     padding: 20px;
 }
-
 .btn-card:hover {
     border-color: var(--sakura-pink);
     transform: scale(1.05);
 }
-
 .btn-card .icon { font-size: 2.5rem; margin-bottom: 12px; }
 .btn-card span { font-weight: 600; color: var(--sakura-dark); font-size: 1.15rem; }
 
-/* S.O.S. 团致敬 */
 .sos-tribute {
     margin-top: 10px;
     margin-bottom: 40px;
@@ -263,14 +264,12 @@ footer {
     max-width: 520px;
     display: inline-block;
 }
-
 .sos-line1 {
     font-size: 0.95rem;
     color: var(--sakura-dark);
     font-weight: 700;
     margin-bottom: 8px;
 }
-
 .sos-line2 {
     font-size: 0.8rem;
     color: var(--text-sub);
@@ -279,7 +278,6 @@ footer {
     margin-bottom: 5px;
     word-break: break-word;
 }
-
 .sos-line3 {
     font-size: 0.85rem;
     color: var(--text-sub);
@@ -294,7 +292,6 @@ footer {
     position: relative;
     padding-left: 30px;
 }
-
 .timeline::before {
     content: '';
     position: absolute;
@@ -305,12 +302,10 @@ footer {
     background: var(--sakura-pink);
     border-radius: 2px;
 }
-
 .timeline-item {
     position: relative;
     margin-bottom: 40px;
 }
-
 .timeline-item::before {
     content: '';
     position: absolute;
@@ -323,7 +318,6 @@ footer {
     border: 3px solid #fff;
     box-shadow: 0 0 0 3px var(--sakura-pink);
 }
-
 .timeline-content {
     background: var(--card-bg);
     padding: 25px;
@@ -331,7 +325,6 @@ footer {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
     transition: transform 0.3s;
 }
-
 .timeline-content:hover { transform: translateY(-3px); }
 
 .timeline-year {
@@ -343,26 +336,22 @@ footer {
     font-weight: 700;
     margin-bottom: 10px;
 }
-
 .timeline-content h3 {
     margin-bottom: 10px;
     color: #222;
     font-size: 1.2rem;
 }
-
 .timeline-content p {
     color: var(--text-sub);
     line-height: 1.7;
     font-size: 0.95rem;
     margin-bottom: 8px;
 }
-
 .timeline-content .highlight {
     color: var(--sakura-dark);
     font-weight: 600;
 }
 
-/* 社史图片 */
 .history-img {
     max-width: 100%;
     height: auto;
@@ -371,19 +360,14 @@ footer {
     margin-top: 15px;
     display: block;
 }
-
 .history-img-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
     margin-top: 15px;
 }
+.history-img-grid .history-img { margin-top: 0; }
 
-.history-img-grid .history-img {
-    margin-top: 0;
-}
-
-/* 附录表格 */
 .appendix {
     margin-top: 60px;
     background: white;
@@ -391,7 +375,6 @@ footer {
     padding: 30px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
 }
-
 .appendix h2 {
     color: var(--sakura-dark);
     margin-bottom: 20px;
@@ -399,13 +382,11 @@ footer {
     border-bottom: 2px solid var(--sakura-pink);
     padding-bottom: 10px;
 }
-
 .appendix table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 30px;
 }
-
 .appendix th,
 .appendix td {
     text-align: left;
@@ -413,17 +394,15 @@ footer {
     border-bottom: 1px solid #f0f0f0;
     font-size: 0.95rem;
 }
-
 .appendix th {
     color: var(--sakura-dark);
     font-weight: 600;
 }
-
 .appendix tr:hover { background-color: #fdf2f4; }
 
 
 /* ============================================================
-   四、小测试页样式
+   四、小测试 - 通用卡片
    ============================================================ */
 
 .quiz-card {
@@ -432,7 +411,6 @@ footer {
     padding: 40px 30px;
     box-shadow: 0 10px 30px rgba(224, 90, 109, 0.1);
 }
-
 .quiz-card h1 {
     text-align: center;
     color: var(--sakura-dark);
@@ -440,7 +418,7 @@ footer {
     font-size: 1.8rem;
 }
 
-/* 进度显示 */
+/* 进度显示（普通模式用） */
 .progress-bar {
     text-align: center;
     margin-bottom: 20px;
@@ -448,14 +426,13 @@ footer {
     font-size: 0.95rem;
     font-weight: 500;
 }
-
 .progress-bar .current {
     color: var(--sakura-dark);
     font-weight: 700;
     font-size: 1.1rem;
 }
 
-/* 单题卡片 */
+/* 单题 */
 .question {
     margin-bottom: 25px;
     min-height: 200px;
@@ -463,19 +440,16 @@ footer {
     flex-direction: column;
     justify-content: center;
 }
-
 .question p {
     font-weight: 600;
     margin-bottom: 12px;
     font-size: 1.05rem;
 }
-
 .options {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
-
 .options label {
     display: flex;
     align-items: center;
@@ -486,18 +460,23 @@ footer {
     transition: all 0.2s;
     border: 1px solid transparent;
 }
-
 .options label:hover {
     background: #fdf2f4;
     border-color: var(--sakura-pink);
 }
-
 .options input {
     margin-right: 12px;
     accent-color: var(--sakura-dark);
 }
 
-/* 通用提交按钮 */
+/* 淡入动画 */
+.fade-in { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* 通用按钮 */
 .btn-submit {
     width: 100%;
     padding: 15px;
@@ -510,21 +489,29 @@ footer {
     cursor: pointer;
     transition: all 0.3s;
     margin-top: 20px;
+    font-family: inherit;
 }
-
 .btn-submit:hover {
     background: #c94b5b;
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(224, 90, 109, 0.3);
 }
+.btn-outline {
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--sakura-dark);
+    border: 1px solid var(--sakura-pink);
+}
+.btn-outline:hover {
+    background: var(--sakura-pink);
+    color: white;
+}
 
-/* 上一题 / 下一题按钮 */
+/* 上一题 / 下一题 */
 .nav-buttons {
     display: flex;
     gap: 12px;
     margin-top: 25px;
 }
-
 .btn-nav {
     flex: 1;
     padding: 14px;
@@ -538,27 +525,15 @@ footer {
     transition: all 0.3s;
     font-family: inherit;
 }
-
 .btn-nav:hover:not(:disabled) {
     background: var(--sakura-pink);
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(224, 90, 109, 0.2);
 }
-
 .btn-nav:disabled {
     opacity: 0.35;
     cursor: not-allowed;
-}
-
-/* 淡入动画 */
-.fade-in {
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateX(10px); }
-    to { opacity: 1; transform: translateX(0); }
 }
 
 /* 结果页 */
@@ -566,39 +541,355 @@ footer {
 .result h2 { color: var(--sakura-dark); font-size: 2rem; margin-bottom: 15px; }
 .result p { font-size: 1.1rem; color: var(--text-sub); line-height: 1.6; margin-bottom: 20px; }
 .result .score { font-size: 3rem; color: var(--sakura-dark); font-weight: bold; }
-
 .result-buttons {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
 }
-
 .result-buttons .btn-submit {
     flex: 1;
     min-width: 140px;
 }
 
-/* 次级按钮（再测一次旁边的“看看社史”） */
-.btn-outline {
+
+/* ============================================================
+   五、小测试 - 模式选择 & 排行榜（quiz/index.html）
+   ============================================================ */
+
+/* 用户信息栏 */
+.user-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 8px 16px;
     background: rgba(255, 255, 255, 0.6);
+    border-radius: 30px;
+    font-size: 0.9rem;
+}
+.user-bar img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--sakura-pink);
+}
+.user-bar .user-name {
+    font-weight: 600;
+    color: #333;
+}
+.user-bar .btn-login-sm,
+.user-bar .btn-logout-sm {
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+.user-bar .btn-login-sm {
+    background: linear-gradient(135deg, #e05a6d, #c94b5b);
+    color: #fff;
+}
+.user-bar .btn-logout-sm {
+    background: transparent;
     color: var(--sakura-dark);
     border: 1px solid var(--sakura-pink);
 }
+.user-bar .btn-login-sm:hover,
+.user-bar .btn-logout-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(224, 90, 109, 0.2);
+}
 
-.btn-outline:hover {
-    background: var(--sakura-pink);
+/* 模式选择 */
+.mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+.mode-card {
+    display: block;
+    padding: 28px 24px;
+    background: var(--card-bg);
+    border-radius: 20px;
+    text-decoration: none;
+    color: var(--text-main);
+    border: 2px solid transparent;
+    transition: all 0.3s;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(224, 90, 109, 0.08);
+}
+.mode-card:hover {
+    border-color: var(--sakura-pink);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(224, 90, 109, 0.18);
+}
+.mode-card .icon { font-size: 2.5rem; margin-bottom: 12px; }
+.mode-card h3 { color: var(--sakura-dark); font-size: 1.2rem; margin-bottom: 6px; }
+.mode-card p { color: var(--text-sub); font-size: 0.85rem; line-height: 1.5; }
+
+/* 排行榜 */
+.rank-tabs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.rank-tab {
+    padding: 8px 24px;
+    border: 1px solid var(--sakura-pink);
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--sakura-dark);
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+.rank-tab.active {
+    background: var(--sakura-dark);
     color: white;
+}
+.rank-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.rank-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    font-size: 0.9rem;
+}
+.rank-item .rank-no {
+    width: 28px;
+    font-weight: 700;
+    color: var(--sakura-dark);
+    text-align: center;
+    flex-shrink: 0;
+}
+.rank-item .rank-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.rank-item .rank-name {
+    flex: 1;
+    font-weight: 600;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.rank-item .rank-score {
+    color: var(--sakura-dark);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.rank-item .rank-time {
+    color: var(--text-sub);
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    min-width: 60px;
+    text-align: right;
+}
+.rank-empty {
+    text-align: center;
+    color: #999;
+    padding: 30px 0;
+    font-size: 0.9rem;
+}
+.gold   { color: #d4a017; }
+.silver { color: #a8a8a8; }
+.bronze { color: #b87433; }
+
+
+/* ============================================================
+   六、小测试 - 答题页 HUD（play.html）
+   ============================================================ */
+
+.hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 12px 18px;
+    background: rgba(255, 183, 197, 0.15);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--sakura-dark);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.hud .hud-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.hud .hud-val {
+    color: #333;
+    font-family: monospace;
+    font-size: 1.05rem;
+}
+
+.feedback {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-top: 12px;
+    min-height: 24px;
+}
+.feedback.correct { color: #2a9d8f; }
+.feedback.wrong   { color: #c94b5b; }
+
+
+/* ============================================================
+   七、留言板（comment/index.html）
+   ============================================================ */
+
+.comment-container {
+    max-width: 720px;
+    margin: 100px auto 60px;
+    padding: 0 20px;
+}
+.comment-card {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 24px;
+    padding: 32px 28px;
+    box-shadow: 0 10px 30px rgba(224, 90, 109, 0.1);
+}
+.comment-card h1 {
+    text-align: center;
+    color: var(--sakura-dark);
+    margin-bottom: 24px;
+    font-size: 1.8rem;
+}
+
+#auth-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#comment-input {
+    width: 100%;
+    min-height: 90px;
+    padding: 12px 14px;
+    border: 1px solid #ffb7c5;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: #fff;
+    resize: vertical;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+}
+#comment-input:focus {
+    outline: none;
+    border-color: #e05a6d;
+    box-shadow: 0 0 0 3px rgba(224, 90, 109, 0.1);
+}
+
+#submit-btn {
+    display: block;
+    margin: 0 auto;
+    padding: 10px 32px;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #e05a6d, #c94b5b);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+#submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(224, 90, 109, 0.3);
+}
+
+#comment-display {
+    margin-top: 30px;
+}
+.comment-item {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #fdf2f4;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+}
+.comment-item img {
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.comment-item strong {
+    color: #e05a6d;
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+}
+.comment-item p {
+    color: #333;
+    margin: 0;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+.login-btn {
+    padding: 10px 28px;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #e05a6d, #c94b5b);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(224, 90, 109, 0.3);
+}
+.logout-btn {
+    padding: 6px 18px;
+    border: 1px solid #ffb7c5;
+    border-radius: 20px;
+    background: transparent;
+    color: #e05a6d;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-left: 10px;
+}
+.back-home-btn {
+    display: inline-block;
+    margin-top: 20px;
+    color: #e05a6d;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.back-home-btn:hover {
+    text-decoration: underline;
 }
 
 
 /* ============================================================
-   五、相关链接页样式
+   八、相关链接页样式
    ============================================================ */
 
 .link-section {
     margin-bottom: 50px;
 }
-
 .link-section-title {
     font-size: 1.4rem;
     color: var(--sakura-dark);
@@ -607,13 +898,11 @@ footer {
     border-left: 4px solid var(--sakura-pink);
     font-weight: 700;
 }
-
 .link-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 18px;
 }
-
 .link-card {
     display: flex;
     align-items: center;
@@ -629,13 +918,11 @@ footer {
     position: relative;
     overflow: hidden;
 }
-
 .link-card:hover {
     border-color: var(--sakura-pink);
     transform: translateY(-4px);
     box-shadow: 0 12px 30px rgba(224, 90, 109, 0.18);
 }
-
 .link-card::before {
     content: '';
     position: absolute;
@@ -648,11 +935,9 @@ footer {
     transition: transform 0.3s;
     transform-origin: top;
 }
-
 .link-card:hover::before {
     transform: scaleY(1);
 }
-
 .link-icon {
     font-size: 2rem;
     width: 52px;
@@ -665,37 +950,31 @@ footer {
     flex-shrink: 0;
     transition: all 0.3s;
 }
-
 .link-card:hover .link-icon {
     background: rgba(255, 183, 197, 0.4);
     transform: scale(1.08);
 }
-
 .link-info {
     flex: 1;
     min-width: 0;
 }
-
 .link-name {
     font-size: 1.05rem;
     font-weight: 600;
     color: var(--sakura-dark);
     margin-bottom: 4px;
 }
-
 .link-desc {
     font-size: 0.82rem;
     color: var(--text-sub);
     line-height: 1.4;
 }
-
 .link-arrow {
     color: var(--sakura-pink);
     font-size: 1.2rem;
     transition: transform 0.3s;
     flex-shrink: 0;
 }
-
 .link-card:hover .link-arrow {
     transform: translateX(4px);
     color: var(--sakura-dark);
@@ -703,7 +982,7 @@ footer {
 
 
 /* ============================================================
-   六、响应式
+   九、响应式
    ============================================================ */
 
 @media (max-width: 600px) {
@@ -712,6 +991,7 @@ footer {
     .page-title h1 { font-size: 2rem; }
     .logo-wrapper img { width: 130px; height: 130px; padding: 10px; }
     .btn-card { min-width: 100%; height: 110px; }
+
     .sos-tribute {
         padding: 12px 18px;
         margin-bottom: 30px;
@@ -719,13 +999,11 @@ footer {
     .sos-line1 { font-size: 0.9rem; }
     .sos-line2 { font-size: 0.72rem; }
     .sos-line3 { font-size: 0.8rem; }
-    .history-img-grid {
-        grid-template-columns: 1fr;
-    }
-    .link-grid {
-        grid-template-columns: 1fr;
-    }
-    .link-card {
-        padding: 16px 18px;
-    }
+
+    .history-img-grid { grid-template-columns: 1fr; }
+
+    .link-grid { grid-template-columns: 1fr; }
+    .link-card { padding: 16px 18px; }
+
+    .user-bar { flex-wrap: wrap; justify-content: center; }
 }
