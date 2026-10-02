@@ -48,7 +48,8 @@ Sakura/
 ├── quiz/
 │   ├── index.html              # 模式选择 + 排行榜
 │   ├── play.html               # 答题页面
-│   └── qna.txt                 # 题库数据
+│   ├── qna-easy.txt            # 题库数据 - 简单
+│   └── qna-hard.txt            # 题库数据 - 困难
 ├── static/
 │   ├── image/
 │   │   ├── intro-2014.png
