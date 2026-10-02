@@ -6,38 +6,6 @@
     <title>答题中 · 科高樱花社</title>
     <link rel="stylesheet" href="../static/sakura.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        .hud {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 12px 18px;
-            background: rgba(255, 183, 197, 0.15);
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--sakura-dark);
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .hud .hud-item { display: flex; align-items: center; gap: 6px; }
-        .hud .hud-val { color: #333; font-family: monospace; font-size: 1.05rem; }
-        .fade-in { animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(10px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        .feedback {
-            text-align: center;
-            font-weight: 700;
-            font-size: 1rem;
-            margin-top: 12px;
-            min-height: 24px;
-        }
-        .feedback.correct { color: #2a9d8f; }
-        .feedback.wrong { color: #c94b5b; }
-    </style>
 </head>
 <body>
     <div class="sakura-bg" id="sakura-bg"></div>
@@ -330,6 +298,13 @@
 
         async function handleScoreSubmit(score, timeSeconds) {
             const statusEl = document.getElementById('submit-status');
+
+            // 关键：提交前重新检查一次 session，防止 init 时未就绪
+            if (!currentUser) {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) currentUser = session.user;
+            }
+
             if (!currentUser) {
                 statusEl.innerHTML = '💡 <a href="javascript:void(0)" onclick="signInWithGitHub()" style="color:var(--sakura-dark);font-weight:600;">使用 GitHub 登录</a> 后成绩才会记录到排行榜哦～';
                 return;
@@ -351,7 +326,7 @@
 
                 if (isBetter) {
                     if (existing) {
-                        await supabaseClient.from('scores')
+                        const { error } = await supabaseClient.from('scores')
                             .update({
                                 score,
                                 time_seconds: timeSeconds,
@@ -359,9 +334,10 @@
                             })
                             .eq('user_id', currentUser.id)
                             .eq('mode', mode);
+                        if (error) throw error;
                         statusEl.innerText = '✅ 已更新你的最佳成绩！';
                     } else {
-                        await supabaseClient.from('scores').insert({
+                        const { error } = await supabaseClient.from('scores').insert({
                             user_id: currentUser.id,
                             username: currentUser.user_metadata.user_name,
                             avatar_url: currentUser.user_metadata.avatar_url,
@@ -369,6 +345,7 @@
                             score,
                             time_seconds: timeSeconds
                         });
+                        if (error) throw error;
                         statusEl.innerText = '✅ 成绩已记录到排行榜！';
                     }
                     localStorage.removeItem('pending_score');
@@ -377,8 +354,18 @@
                     localStorage.removeItem('pending_score');
                 }
             } catch (e) {
-                statusEl.innerText = '⚠️ 成绩提交失败：' + e.message;
+                scoreSubmitted = false;  // 允许重试
+                statusEl.innerHTML = '⚠️ 成绩提交失败：' + e.message +
+                    '<br><a href="javascript:void(0)" onclick="retrySubmit()" style="color:var(--sakura-dark);font-weight:600;">点此重试</a>';
             }
+        }
+
+        // 新增：手动重试提交
+        async function retrySubmit() {
+            scoreSubmitted = false;
+            const scoreText = document.getElementById('final-score').innerText.replace(' 分', '');
+            const timeSec = elapsedSeconds;
+            await handleScoreSubmit(parseInt(scoreText), timeSec);
         }
 
         async function submitPendingScore(p) {
@@ -442,10 +429,10 @@
 
         // 监听登录状态变化
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            console.log('Auth event:', event);
             if (session) {
                 currentUser = session.user;
 
-                // 优先：检查是否有暂存的成绩需要提交
                 const pending = localStorage.getItem('pending_score');
                 if (pending) {
                     try {
