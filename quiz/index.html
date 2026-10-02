@@ -186,6 +186,58 @@
         // 初始化
         loadRank('normal');
 
+        // ===== 登录状态变化时，尝试提交暂存的成绩 =====
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            if (session) {
+                const pending = localStorage.getItem('pending_score');
+                if (pending) {
+                    try {
+                        const p = JSON.parse(pending);
+                        const user = session.user;
+
+                        const { data: existing } = await supabaseClient
+                            .from('scores')
+                            .select('score, time_seconds')
+                            .eq('user_id', user.id)
+                            .eq('mode', p.mode)
+                            .maybeSingle();
+
+                        const isBetter = !existing ||
+                            p.score > existing.score ||
+                            (p.score === existing.score && p.time_seconds < existing.time_seconds);
+
+                        if (isBetter) {
+                            if (existing) {
+                                await supabaseClient.from('scores')
+                                    .update({
+                                        score: p.score,
+                                        time_seconds: p.time_seconds,
+                                        updated_at: new Date()
+                                    })
+                                    .eq('user_id', user.id)
+                                    .eq('mode', p.mode);
+                            } else {
+                                await supabaseClient.from('scores').insert({
+                                    user_id: user.id,
+                                    username: user.user_metadata.user_name,
+                                    avatar_url: user.user_metadata.avatar_url,
+                                    mode: p.mode,
+                                    score: p.score,
+                                    time_seconds: p.time_seconds
+                                });
+                            }
+                        }
+                        localStorage.removeItem('pending_score');
+                        loadRank(currentMode);
+                    } catch (e) {
+                        console.error('提交暂存成绩失败：', e);
+                    }
+                } else {
+                    loadRank(currentMode);
+                }
+            }
+        });
+
         // 樱花飘落
         const sakuraBg = document.getElementById('sakura-bg');
         for (let i = 0; i < 30; i++) {
