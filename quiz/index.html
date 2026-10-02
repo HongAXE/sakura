@@ -14,31 +14,44 @@
     <div class="container">
         <div class="quiz-card">
             <!-- ===== 用户信息栏 ===== -->
-            <div class="user-bar" id="user-bar">
-                <!-- 由 JS 动态渲染 -->
-            </div>
+            <div class="user-bar" id="user-bar"></div>
 
             <h1>🎯 科高樱花社 · ACGN 小测试</h1>
-            <p style="text-align:center;color:#666;margin-bottom:24px;">选择一个模式开始挑战吧～</p>
 
+            <!-- ===== 难度选择 ===== -->
+            <div class="rank-tabs" style="margin-bottom: 20px;">
+                <button class="rank-tab active" data-difficulty="easy" onclick="switchDifficulty('easy')">🌸 简单模式</button>
+                <button class="rank-tab" data-difficulty="hard" onclick="switchDifficulty('hard')">🔥 困难模式</button>
+            </div>
+
+            <p style="text-align:center;color:#666;margin-bottom:24px;">选择一个玩法开始挑战吧～</p>
+
+            <!-- ===== 玩法选择 ===== -->
             <div class="mode-grid">
-                <a href="play.html?mode=normal" class="mode-card">
+                <a href="play.html?mode=normal&difficulty=easy" id="mode-normal" class="mode-card">
                     <div class="icon">📖</div>
                     <h3>普通模式</h3>
                     <p>随机抽取 15 题<br>可返回上一题修改答案</p>
                 </a>
-                <a href="play.html?mode=endless" class="mode-card">
-                    <div class="icon">🔥</div>
+                <a href="play.html?mode=endless&difficulty=easy" id="mode-endless" class="mode-card">
+                    <div class="icon">📚</div>
                     <h3>无尽模式</h3>
                     <p>全部题目打乱<br>答错 10 题后结束挑战</p>
                 </a>
             </div>
 
             <h2 style="text-align:center;color:var(--sakura-dark);font-size:1.3rem;margin-bottom:16px;">🏆 排行榜</h2>
+
+            <!-- ===== 排行榜：难度 + 模式 双层标签 ===== -->
             <div class="rank-tabs">
-                <button class="rank-tab active" data-mode="normal" onclick="switchTab('normal')">普通模式</button>
-                <button class="rank-tab" data-mode="endless" onclick="switchTab('endless')">无尽模式</button>
+                <button class="rank-tab active" data-rank-diff="easy" onclick="switchRankDiff('easy')">🌸 简单</button>
+                <button class="rank-tab" data-rank-diff="hard" onclick="switchRankDiff('hard')">🔥 困难</button>
             </div>
+            <div class="rank-tabs">
+                <button class="rank-tab active" data-rank-mode="normal" onclick="switchRankMode('normal')">普通模式</button>
+                <button class="rank-tab" data-rank-mode="endless" onclick="switchRankMode('endless')">无尽模式</button>
+            </div>
+
             <div id="rank-list" class="rank-list">
                 <p class="rank-empty">正在加载排行榜...</p>
             </div>
@@ -51,7 +64,9 @@
 
     <script src="../static/supabase-client.js"></script>
     <script>
-        let currentMode = 'normal';
+        let currentDifficulty = 'easy';   // 玩法选择用的难度
+        let rankDifficulty = 'easy';      // 排行榜用的难度
+        let rankMode = 'normal';          // 排行榜用的模式
         let currentUser = null;
 
         // ===== 渲染用户信息栏 =====
@@ -77,9 +92,7 @@
         async function signInWithGitHub() {
             await supabaseClient.auth.signInWithOAuth({
                 provider: 'github',
-                options: {
-                    redirectTo: location.href
-                }
+                options: { redirectTo: location.href }
             });
         }
 
@@ -89,8 +102,36 @@
             renderUserBar();
         }
 
+        // ===== 切换难度（玩法选择区） =====
+        function switchDifficulty(diff) {
+            currentDifficulty = diff;
+            document.querySelectorAll('[data-difficulty]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.difficulty === diff);
+            });
+            // 更新模式卡片链接
+            document.getElementById('mode-normal').href = `play.html?mode=normal&difficulty=${diff}`;
+            document.getElementById('mode-endless').href = `play.html?mode=endless&difficulty=${diff}`;
+        }
+
+        // ===== 切换排行榜难度 / 模式 =====
+        function switchRankDiff(diff) {
+            rankDifficulty = diff;
+            document.querySelectorAll('[data-rank-diff]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.rankDiff === diff);
+            });
+            loadRank(rankMode, rankDifficulty);
+        }
+
+        function switchRankMode(mode) {
+            rankMode = mode;
+            document.querySelectorAll('[data-rank-mode]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.rankMode === mode);
+            });
+            loadRank(rankMode, rankDifficulty);
+        }
+
         // ===== 加载排行榜 =====
-        async function loadRank(mode) {
+        async function loadRank(mode, difficulty) {
             const listEl = document.getElementById('rank-list');
             listEl.innerHTML = '<p class="rank-empty">正在加载...</p>';
 
@@ -98,6 +139,7 @@
                 .from('scores')
                 .select('*')
                 .eq('mode', mode)
+                .eq('difficulty', difficulty)
                 .order('score', { ascending: false })
                 .order('time_seconds', { ascending: true })
                 .limit(50);
@@ -130,21 +172,13 @@
             return m > 0 ? `${m}分${s}秒` : `${s}秒`;
         }
 
-        function switchTab(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.rank-tab').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.mode === mode);
-            });
-            loadRank(mode);
-        }
-
         // ===== 初始化 =====
         async function init() {
-            // 读取当前 session
             const { data: { session } } = await supabaseClient.auth.getSession();
             currentUser = session ? session.user : null;
             renderUserBar();
-            loadRank(currentMode);
+            switchDifficulty(currentDifficulty);   // 初始化模式卡片链接
+            loadRank(rankMode, rankDifficulty);
         }
 
         init();
@@ -161,12 +195,14 @@
                     try {
                         const p = JSON.parse(pending);
                         const user = session.user;
+                        const diff = p.difficulty || 'easy';
 
                         const { data: existing } = await supabaseClient
                             .from('scores')
                             .select('score, time_seconds')
                             .eq('user_id', user.id)
                             .eq('mode', p.mode)
+                            .eq('difficulty', diff)
                             .maybeSingle();
 
                         const isBetter = !existing ||
@@ -182,25 +218,27 @@
                                         updated_at: new Date()
                                     })
                                     .eq('user_id', user.id)
-                                    .eq('mode', p.mode);
+                                    .eq('mode', p.mode)
+                                    .eq('difficulty', diff);
                             } else {
                                 await supabaseClient.from('scores').insert({
                                     user_id: user.id,
                                     username: user.user_metadata.user_name,
                                     avatar_url: user.user_metadata.avatar_url,
                                     mode: p.mode,
+                                    difficulty: diff,
                                     score: p.score,
                                     time_seconds: p.time_seconds
                                 });
                             }
                         }
                         localStorage.removeItem('pending_score');
-                        loadRank(currentMode);
+                        loadRank(rankMode, rankDifficulty);
                     } catch (e) {
                         console.error('提交暂存成绩失败：', e);
                     }
                 } else {
-                    loadRank(currentMode);
+                    loadRank(rankMode, rankDifficulty);
                 }
             }
         });
