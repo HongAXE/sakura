@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>答题中 · 科高樱花社</title>
+    <link rel="stylesheet" href="../static/sakura.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 12px 18px;
+            background: rgba(255, 183, 197, 0.15);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--sakura-dark);
+        }
+        .hud .hud-item { display: flex; align-items: center; gap: 6px; }
+        .hud .hud-val { color: #333; font-family: monospace; font-size: 1.05rem; }
+        .fade-in { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .feedback {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 12px;
+            min-height: 24px;
+        }
+        .feedback.correct { color: #2a9d8f; }
+        .feedback.wrong { color: #c94b5b; }
+    </style>
+</head>
+<body>
+    <div class="sakura-bg" id="sakura-bg"></div>
+    <a href="./" class="back-home" onclick="return confirmExit()">← 返回</a>
+
+    <div class="container">
+        <div class="quiz-card" id="quiz-card">
+            <h1 id="mode-title">🎯 加载中...</h1>
+
+            <div class="hud" id="hud">
+                <div class="hud-item">⏱ <span class="hud-val" id="timer">0:00</span></div>
+                <div class="hud-item" id="progress-hud">第 <span class="hud-val" id="current-num">1</span> / <span class="hud-val" id="total-num">15</span> 题</div>
+                <div class="hud-item" id="score-hud" style="display:none;">🏆 <span class="hud-val" id="live-score">0</span> 分</div>
+                <div class="hud-item" id="mistake-hud" style="display:none;">❌ <span class="hud-val" id="mistake-count">0</span> / 10</div>
+            </div>
+
+            <div id="question-container">
+                <p style="text-align:center;color:#666;">正在加载题库...</p>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <div class="nav-buttons" id="nav-buttons" style="display:none;">
+                <button class="btn-nav" id="prev-btn" onclick="prevQuestion()">← 上一题</button>
+                <button class="btn-nav" id="next-btn" onclick="nextQuestion()">下一题 →</button>
+            </div>
+        </div>
+
+        <div class="quiz-card result" id="result-card" style="display:none;">
+            <h2>测试结果</h2>
+            <div class="score" id="final-score">0</div>
+            <p id="result-desc"></p>
+            <div id="submit-status" style="margin: 16px 0; font-size: 0.9rem; color: #666;"></div>
+            <div class="result-buttons">
+                <button class="btn-submit" onclick="location.reload()">再测一次</button>
+                <button class="btn-submit btn-outline" onclick="location.href='./'">看看排行榜</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 深圳科学高中樱花社 · 由 HongAX 开发
+    </footer>
+
+    <script src="../static/supabase-client.js"></script>
+    <script>
+        const params = new URLSearchParams(location.search);
+        const mode = params.get('mode') === 'endless' ? 'endless' : 'normal';
+        const TOTAL = 15;
+        const MAX_MISTAKES = 10;
+
+        let quizData = [];
+        let currentIndex = 0;
+        let userAnswers = [];
+        let currentUser = null;
+        let startTime = 0;
+        let timerInterval = null;
+        let elapsedSeconds = 0;
+        let mistakes = 0;
+        let finished = false;
+        let scoreSubmitted = false;
+
+        // ===== 初始化 =====
+        async function init() {
+            document.getElementById('mode-title').innerText =
+                mode === 'endless' ? '🔥 无尽模式' : '📖 普通模式';
+
+            if (mode === 'endless') {
+                document.getElementById('progress-hud').style.display = 'none';
+                document.getElementById('score-hud').style.display = 'flex';
+                document.getElementById('mistake-hud').style.display = 'flex';
+            }
+
+            // 检查登录
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            currentUser = session ? session.user : null;
+
+            // 加载题库
+            try {
+                const res = await fetch('./qna.txt');
+                const text = await res.text();
+                let all = text.split('\n').filter(l => l.trim()).map(line => {
+                    const p = line.split('|');
+                    return {
+                        q: p[0].trim(),
+                        options: [p[1].trim(), p[2].trim(), p[3].trim(), p[4].trim()],
+                        answer: parseInt(p[5].trim())
+                    };
+                });
+                if (all.length === 0) throw new Error('题库为空');
+
+                all = shuffleArray(all);
+                if (mode === 'normal') {
+                    quizData = all.slice(0, TOTAL);
+                } else {
+                    quizData = all;
+                }
+                userAnswers = new Array(quizData.length).fill(null);
+
+                document.getElementById('total-num').innerText = quizData.length;
+                document.getElementById('nav-buttons').style.display = 'flex';
+
+                startTimer();
+                renderQuestion();
+            } catch (e) {
+                document.getElementById('question-container').innerHTML =
+                    '<p style="text-align:center;color:#e05a6d;">❌ 题库加载失败，请检查网络或部署环境</p>';
+            }
+        }
+
+        function shuffleArray(a) {
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+                const m = Math.floor(elapsedSeconds / 60);
+                const s = elapsedSeconds % 60;
+                document.getElementById('timer').innerText = `${m}:${String(s).padStart(2, '0')}`;
+            }, 250);
+        }
+
+        function renderQuestion() {
+            if (finished) return;
+            const item = quizData[currentIndex];
+            const container = document.getElementById('question-container');
+
+            let html = `<div class="question fade-in"><p>${currentIndex + 1}. ${item.q}</p><div class="options">`;
+            item.options.forEach((opt, i) => {
+                const checked = userAnswers[currentIndex] === i ? 'checked' : '';
+                html += `<label><input type="radio" name="q" value="${i}" ${checked} onchange="saveAnswer(${i})"> ${opt}</label>`;
+            });
+            html += `</div></div>`;
+            container.innerHTML = html;
+
+            document.getElementById('feedback').innerText = '';
+
+            if (mode === 'normal') {
+                document.getElementById('current-num').innerText = currentIndex + 1;
+                document.getElementById('prev-btn').style.display = currentIndex === 0 ? 'none' : 'block';
+                const isLast = currentIndex === quizData.length - 1;
+                document.getElementById('next-btn').innerText = isLast ? '提交答案' : '下一题 →';
+                document.getElementById('prev-btn').disabled = currentIndex === 0;
+            } else {
+                document.getElementById('prev-btn').style.display = 'none';
+                document.getElementById('next-btn').style.display = 'none';
+                // 无尽模式：选了答案后自动进入下一题
+                if (userAnswers[currentIndex] !== null) {
+                    setTimeout(() => nextQuestion(true), 800);
+                }
+            }
+        }
+
+        function saveAnswer(i) {
+            userAnswers[currentIndex] = i;
+            if (mode === 'endless') {
+                // 立即判断对错
+                const correct = quizData[currentIndex].answer === i;
+                const fb = document.getElementById('feedback');
+                if (correct) {
+                    fb.innerText = '✅ 答对 +10 分';
+                    fb.className = 'feedback correct';
+                    document.getElementById('live-score').innerText = (parseInt(document.getElementById('live-score').innerText) + 10);
+                } else {
+                    fb.innerText = '❌ 答错';
+                    fb.className = 'feedback wrong';
+                    mistakes++;
+                    document.getElementById('mistake-count').innerText = mistakes;
+                }
+                // 延迟进入下一题
+                setTimeout(() => nextQuestion(true), 800);
+            }
+        }
+
+        function prevQuestion() {
+            if (mode !== 'normal') return;
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function nextQuestion(fromEndless) {
+            if (mode === 'normal' && !fromEndless) {
+                if (userAnswers[currentIndex] === null) {
+                    alert('请先选择答案再进入下一题哦～');
+                    return;
+                }
+                if (currentIndex === quizData.length - 1) {
+                    submitQuiz();
+                    return;
+                }
+                currentIndex++;
+                renderQuestion();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (mode === 'endless') {
+                // 无尽模式：检查是否达到错误上限
+                if (mistakes >= MAX_MISTAKES) {
+                    submitQuiz();
+                    return;
+                }
+                if (currentIndex >= quizData.length - 1) {
+                    // 题库答完了，也结束
+                    submitQuiz();
+                    return;
+                }
+                currentIndex++;
+                renderQuestion();
+            }
+        }
+
+        async function submitQuiz() {
+            finished = true;
+            clearInterval(timerInterval);
+
+            let finalScore = 0;
+            let correctCount = 0;
+            const wrongList = [];
+
+            if (mode === 'normal') {
+                quizData.forEach((item, i) => {
+                    if (userAnswers[i] === item.answer) correctCount++;
+                    else {
+                        wrongList.push({
+                            q: item.q,
+                            yourAnswer: userAnswers[i] !== null ? item.options[userAnswers[i]] : '（未作答）',
+                            correctAnswer: item.options[item.answer]
+                        });
+                    }
+                });
+                finalScore = Math.round((correctCount / quizData.length) * 100);
+            } else {
+                finalScore = parseInt(document.getElementById('live-score').innerText);
+                correctCount = finalScore / 10;
+                quizData.forEach((item, i) => {
+                    if (userAnswers[i] !== null && userAnswers[i] !== item.answer) {
+                        wrongList.push({
+                            q: item.q,
+                            yourAnswer: item.options[userAnswers[i]],
+                            correctAnswer: item.options[item.answer]
+                        });
+                    }
+                });
+            }
+
+            const timeSeconds = elapsedSeconds;
+
+            document.getElementById('quiz-card').style.display = 'none';
+            document.getElementById('result-card').style.display = 'block';
+            document.getElementById('final-score').innerText = finalScore + ' 分';
+
+            let desc = '';
+            if (mode === 'normal') {
+                const p = correctCount / quizData.length;
+                if (p <= 0.3) desc = '看来你对 ACGN 的了解还不够深哦～';
+                else if (p <= 0.6) desc = '不错，你已经是一名合格的科高樱花了！';
+                else if (p <= 0.8) desc = '哇，资深社员！你对二次元的爱令人感动。';
+                else desc = '🎉 骨灰级元老！你就是樱花社的活字典！';
+                document.getElementById('result-desc').innerText =
+                    `答对 ${correctCount} / ${quizData.length} 题，用时 ${formatTime(timeSeconds)}。${desc}`;
+            } else {
+                document.getElementById('result-desc').innerText =
+                    `答对 ${correctCount} 题，答错 ${mistakes} 题，用时 ${formatTime(timeSeconds)}。`;
+            }
+
+            // 成绩提交
+            await handleScoreSubmit(finalScore, timeSeconds);
+
+            // 错题回顾（普通模式 + 无尽模式都显示）
+            if (wrongList.length > 0 && mode === 'normal') {
+                let html = '<div style="margin-top:24px;text-align:left;"><h3 style="color:var(--sakura-dark);font-size:1.05rem;margin-bottom:10px;">📝 错题回顾</h3>';
+                wrongList.forEach((w, i) => {
+                    html += `<div style="background:rgba(255,183,197,0.15);padding:10px 14px;border-radius:10px;margin-bottom:6px;font-size:0.85rem;">
+                        <p style="font-weight:600;margin-bottom:4px;">${i + 1}. ${w.q}</p>
+                        <p style="color:#c94b5b;margin:2px 0;">你的答案：${w.yourAnswer}</p>
+                        <p style="color:#2a9d8f;margin:2px 0;">正确答案：${w.correctAnswer}</p>
+                    </div>`;
+                });
+                html += '</div>';
+                document.getElementById('result-desc').innerHTML += html;
+            }
+        }
+
+        async function handleScoreSubmit(score, timeSeconds) {
+            const statusEl = document.getElementById('submit-status');
+            if (!currentUser) {
+                statusEl.innerHTML = '💡 <a href="javascript:void(0)" onclick="signInWithGitHub()" style="color:var(--sakura-dark);font-weight:600;">使用 GitHub 登录</a> 后成绩才会记录到排行榜哦～';
+                return;
+            }
+            if (scoreSubmitted) return;
+            scoreSubmitted = true;
+
+            try {
+                const { data: existing } = await supabaseClient
+                    .from('scores')
+                    .select('score, time_seconds')
+                    .eq('user_id', currentUser.id)
+                    .eq('mode', mode)
+                    .maybeSingle();
+
+                const isBetter = !existing ||
+                    score > existing.score ||
+                    (score === existing.score && timeSeconds < existing.time_seconds);
+
+                if (isBetter) {
+                    if (existing) {
+                        await supabaseClient.from('scores')
+                            .update({
+                                score,
+                                time_seconds: timeSeconds,
+                                updated_at: new Date()
+                            })
+                            .eq('user_id', currentUser.id)
+                            .eq('mode', mode);
+                        statusEl.innerText = '✅ 已更新你的最佳成绩！';
+                    } else {
+                        await supabaseClient.from('scores').insert({
+                            user_id: currentUser.id,
+                            username: currentUser.user_metadata.user_name,
+                            avatar_url: currentUser.user_metadata.avatar_url,
+                            mode,
+                            score,
+                            time_seconds: timeSeconds
+                        });
+                        statusEl.innerText = '✅ 成绩已记录到排行榜！';
+                    }
+                } else {
+                    statusEl.innerText = `📌 本次成绩未超过你的最佳记录（${existing.score} 分 / ${formatTime(existing.time_seconds)}）`;
+                }
+            } catch (e) {
+                statusEl.innerText = '⚠️ 成绩提交失败：' + e.message;
+            }
+        }
+
+        async function signInWithGitHub() {
+            await supabaseClient.auth.signInWithOAuth({
+                provider: 'github',
+                options: {
+                    redirectTo: location.href
+                }
+            });
+        }
+
+        function confirmExit() {
+            return finished || confirm('确定要退出答题吗？当前进度不会保存。');
+        }
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return m > 0 ? `${m}分${s}秒` : `${s}秒`;
+        }
+
+        // ===== 初始化 =====
+        init();
+
+        // 监听登录状态变化，用于登录后自动提交成绩
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            if (session) {
+                currentUser = session.user;
+                // 如果已经在结果页且还没提交，则自动提交
+                if (finished && !scoreSubmitted) {
+                    const scoreText = document.getElementById('final-score').innerText.replace(' 分', '');
+                    await handleScoreSubmit(parseInt(scoreText), elapsedSeconds);
+                }
+            } else {
+                currentUser = null;
+            }
+        });
+
+        // 樱花飘落
+        const sakuraBg = document.getElementById('sakura-bg');
+        for (let i = 0; i < 30; i++) {
+            const s = document.createElement('div');
+            s.classList.add('sakura');
+            const size = Math.random() * 12 + 6;
+            s.style.width = size + 'px';
+            s.style.height = size + 'px';
+            s.style.left = Math.random() * 100 + 'vw';
+            s.style.animationDuration = (Math.random() * 5 + 8) + 's';
+            s.style.animationDelay = Math.random() * 5 + 's';
+            sakuraBg.appendChild(s);
+        }
+    </script>
+    <script src="../static/music-player.js" data-src="../static/music/music.mp3"></script>
+</body>
+</html>
