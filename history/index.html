@@ -213,19 +213,21 @@
                 本页时间线整理自樱花社社员编写的《樱花社社史》原始文档。如需查阅完整原文，可通过以下方式获取。
             </p>
 
+            <!-- 下载按钮 -->
             <div class="doc-actions">
                 <a href="../static/another/sakura-history.docx" download class="btn-submit btn-outline doc-btn">
                     📥 下载 Word 原稿（.docx）
                 </a>
-                <a href="../static/another/sakura-history.pdf" target="_blank" rel="noopener" class="btn-submit btn-outline doc-btn">
-                    🔗 在新窗口打开 PDF
+                <a href="../static/another/sakura-history.pdf" download class="btn-submit btn-outline doc-btn">
+                    📥 下载 PDF 原稿（.pdf）
                 </a>
             </div>
 
-            <details class="pdf-viewer-wrap">
+            <!-- 页面内预览（PDF.js 渲染） -->
+            <details class="pdf-viewer-wrap" id="pdf-details">
                 <summary>📖 在页面内预览 PDF 原文</summary>
-                <div class="pdf-viewer">
-                    <iframe src="../static/another/sakura-history.pdf" title="樱花社社史 PDF 预览"></iframe>
+                <div class="pdf-viewer" id="pdf-viewer">
+                    <p class="pdf-loading" id="pdf-loading">正在加载 PDF，请稍候……</p>
                 </div>
             </details>
         </div>
