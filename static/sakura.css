@@ -1007,3 +1007,85 @@ footer {
 
     .user-bar { flex-wrap: wrap; justify-content: center; }
 }
+/* ============================================================
+   原始文档（Word 下载 + PDF 预览）
+   ============================================================ */
+
+.doc-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.doc-btn {
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    margin-top: 0 !important;
+    width: auto !important;
+    padding: 10px 24px !important;
+    font-size: 0.95rem !important;
+}
+
+.pdf-viewer-wrap {
+    margin-top: 8px;
+    border: 1px solid #ffb7c5;
+    border-radius: 12px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.pdf-viewer-wrap summary {
+    padding: 12px 18px;
+    cursor: pointer;
+    color: var(--sakura-dark);
+    font-weight: 600;
+    font-size: 0.95rem;
+    user-select: none;
+    list-style: none;
+    background: rgba(255, 183, 197, 0.12);
+    transition: background 0.2s;
+}
+
+.pdf-viewer-wrap summary::-webkit-details-marker {
+    display: none;
+}
+
+.pdf-viewer-wrap summary::before {
+    content: '▶ ';
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform 0.2s;
+}
+
+.pdf-viewer-wrap[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.pdf-viewer-wrap summary:hover {
+    background: rgba(255, 183, 197, 0.22);
+}
+
+.pdf-viewer {
+    width: 100%;
+    height: 70vh;
+    min-height: 480px;
+}
+
+.pdf-viewer iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+@media (max-width: 600px) {
+    .pdf-viewer {
+        height: 60vh;
+        min-height: 380px;
+    }
+    .doc-btn {
+        width: 100% !important;
+    }
+}
