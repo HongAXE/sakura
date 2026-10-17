@@ -183,27 +183,15 @@
 
         <div class="appendix">
             <h2>历届指导老师</h2>
-            <table>
-                <tr><th>年份</th><th>姓名</th><th>备注</th></tr>
-                <tr><td>2013 - ?</td><td>李银华</td><td>首届指导老师，日语老师</td></tr>
-                <tr><td>? - 2023</td><td>洪熙惠</td><td>日语老师（已不在科高）</td></tr>
-                <tr><td>2023 - 至今</td><td>申旭</td><td>北师大世界史硕士，资深养猫专业户，由章鱼学姐找来</td></tr>
-            </table>
+            <div id="teachers-container" class="leaders-list">
+                <p style="color: #8c8279; font-size: 0.9rem;">正在加载名录...</p>
+            </div>
 
             <h2>历届社长与干部（部分）</h2>
-            <table>
-                <tr><th>年份</th><th>社长 / 主要负责人</th></tr>
-                <tr><td>2013</td><td>沐七 NANA（首任社长）；cos 部部长：兰 o 科；绘画部部长：紫色倒皇冠</td></tr>
-                <tr><td>2014</td><td>七染风</td></tr>
-                <tr><td>2015</td><td>Xx、Berserk Miyuki（QQ 名：mino）</td></tr>
-                <tr><td>2016</td><td>扣子（澄）</td></tr>
-                <tr><td>2021</td><td>熊社长猫猫；骑士部：陈部长何羽晨；精灵部：余瑞；法师部：冯嘉毅</td></tr>
-                <tr><td>2022</td><td>黄社长 kksk；骑士部：陈部长上单；精灵部：林部长福瑞；法师部：黄部长温迪；秘书：欧阳哗</td></tr>
-                <tr><td>2023</td><td>轩酒小灯；台骑士部：胧月；精灵部：数字没有养猫；法师部：水水；秘书：章鱼</td></tr>
-                <tr><td>2024</td><td>李社长 李泽天胤</td></tr>
-                <tr><td>2025</td><td>綦社长 Reverie；财务：姚L；秘书：陈J、王JX</td></tr>
-                <tr><td>2026</td><td>许社长 Cyan；财务：汪秘书</td></tr>
-            </table>
+            <div id="leaders-container" class="leaders-list">
+                <p style="color: #8c8279; font-size: 0.9rem;">正在加载名录...</p>
+            </div>
+
         </div>
 
         <!-- ===== 原始文档 ===== -->
@@ -244,6 +232,67 @@
             sakura.style.animationDelay = Math.random() * 5 + 's';
             sakuraBg.appendChild(sakura);
         }
+    </script>
+    <script>
+        // ===== 动态加载历届干部名单 =====
+        async function loadLeaders() {
+            const container = document.getElementById('leaders-container');
+            try {
+                const res = await fetch('../static/data/leaders.json');
+                if (!res.ok) throw new Error('文件读取失败');
+                const data = await res.json();
+
+                let html = '';
+                data.forEach(item => {
+                    html += `<div class="leader-item">`;
+                    html += `  <div class="leader-year">${item.year}</div>`;
+                    html += `  <div class="leader-info">`;
+                    html += `    <div class="leader-president">社长：${item.president}</div>`;
+
+                    if (item.others && item.others.length > 0) {
+                        html += `<div class="leader-desc">`;
+                        item.others.forEach(sub => {
+                            html += `<div class="leader-sub-item">${sub.role}：${sub.name}</div>`;
+                        });
+                        html += `</div>`;
+                    }
+                    html += `  </div>`;
+                    html += `</div>`;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                console.error('加载干部名单失败:', e);
+                container.innerHTML = '<p style="color: #b04e62; font-size: 0.9rem;">⚠ 干部名单加载失败，请通过服务器环境访问。</p>';
+            }
+        }
+        loadLeaders();
+        // ===== 动态加载历届指导老师 =====
+        async function loadTeachers() {
+            const container = document.getElementById('teachers-container');
+            try {
+                const res = await fetch('../static/data/teachers.json');
+                if (!res.ok) throw new Error('文件读取失败');
+                const data = await res.json();
+
+                let html = '';
+                data.forEach(item => {
+                    html += `<div class="leader-item">`;
+                    html += `  <div class="leader-year">${item.period}</div>`;
+                    html += `  <div class="leader-info">`;
+                    html += `    <div class="leader-president">${item.name}</div>`;
+                    if (item.note) {
+                        html += `    <div class="leader-note">${item.note}</div>`;
+                    }
+                    html += `  </div>`;
+                    html += `</div>`;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                console.error('加载指导老师名单失败:', e);
+                container.innerHTML = '<p style="color: #b04e62; font-size: 0.9rem;">⚠ 指导老师名单加载失败，请通过服务器环境访问。</p>';
+            }
+        }
+        loadTeachers();
     </script>
     <script src="../static/music-player.js" data-src="../static/music/music.mp3"></script>
 </body>
