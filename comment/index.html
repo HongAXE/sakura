@@ -10,7 +10,7 @@
 <body>
     <div class="comment-container">
         <div class="comment-card">
-            <h1>🌸 留言板</h1>
+            <h1>留言板</h1>
             <div id="auth-section"></div>
             <div id="comment-section" style="display: none;">
                 <textarea id="comment-input" placeholder="写下你的留言..."></textarea>
@@ -91,7 +91,7 @@
                     <button class="logout-btn" onclick="signOut()">退出</button>
                 </p>`;
             } else {
-                authSection.innerHTML = `<button class="login-btn" onclick="signInWithGitHub()">🐙 使用 GitHub 登录</button>`;
+                authSection.innerHTML = `<button class="login-btn" onclick="signInWithGitHub()">使用 GitHub 登录</button>`;
             }
 
             const commentSection = document.getElementById('comment-section');
