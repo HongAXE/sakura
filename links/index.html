@@ -18,11 +18,11 @@
 
         <!-- 衍生平台 -->
         <div class="link-section">
-            <div class="link-section-title">🌸 衍生平台</div>
+            <div class="link-section-title">衍生平台</div>
             <div class="link-grid">
                 <!-- 社群审核 QQ -->
                 <a href="http://1704475894.qzone.qq.com/" target="_blank" rel="noopener" class="link-card">
-                    <div class="link-icon">💬</div>
+                    <img src="../static/logo/sakura.png" alt="QQ群" class="link-avatar">
                     <div class="link-info">
                         <div class="link-name">社群审核 QQ</div>
                         <div class="link-desc">加入樱花社官方 QQ 群</div>
@@ -32,20 +32,20 @@
 
                 <!-- 樱花社贴吧 -->
                 <a href="https://tieba.baidu.com/f?kw=深圳科高樱花社吧" target="_blank" rel="noopener" class="link-card">
-                    <div class="link-icon">📌</div>
+                    <img src="../static/logo/tieba.jpg" alt="贴吧" class="link-avatar">
                     <div class="link-info">
                         <div class="link-name">樱花社贴吧</div>
-                        <div class="link-desc">深圳科高樱花社吧 · 历史与交流</div>
+                        <div class="link-desc">官方贴吧 · 闲聊交流</div>
                     </div>
                     <div class="link-arrow">→</div>
                 </a>
 
                 <!-- 樱花社微博 -->
                 <a href="https://weibo.com/u/3810142665" target="_blank" rel="noopener" class="link-card">
-                    <div class="link-icon">📢</div>
+                    <img src="../static/logo/weibo.jpg" alt="微博" class="link-avatar">
                     <div class="link-info">
                         <div class="link-name">樱花社微博</div>
-                        <div class="link-desc">官方微博 · 活动动态</div>
+                        <div class="link-desc">官方微博 · 已废弃</div>
                     </div>
                     <div class="link-arrow">→</div>
                 </a>
@@ -54,11 +54,11 @@
 
         <!-- 相关信息 -->
         <div class="link-section">
-            <div class="link-section-title">🔗 其他相关</div>
+            <div class="link-section-title">其他相关</div>
             <div class="link-grid">
                 <!-- 科外所主页 -->
                 <a href="https://hongaxe.github.io/work/3" target="_blank" rel="noopener" class="link-card">
-                    <div class="link-icon">🛸</div>
+                    <img src="../static/logo/kgri.jpg" alt="科外所" class="link-avatar">
                     <div class="link-info">
                         <div class="link-name">科外所主页</div>
                         <div class="link-desc">科高外星人研究所 · KGRI</div>
@@ -68,7 +68,7 @@
 
                 <!-- 开发者主页 -->
                 <a href="https://hongaxe.github.io" target="_blank" rel="noopener" class="link-card">
-                    <div class="link-icon">🪪</div>
+                    <img src="../static/logo/hongax.png" alt="开发者" class="link-avatar">
                     <div class="link-info">
                         <div class="link-name">开发者主页</div>
                         <div class="link-desc">HongAX · 本网站开发者</div>
@@ -78,13 +78,22 @@
 
                 <!-- 项目仓库 -->
                 <a href="https://github.com/HongAXE/sakura" target="_blank" rel="noopener" class="link-card">
-                    <div class="link-icon">📦</div>
+                    <img src="../static/logo/github.jpg" alt="GitHub" class="link-avatar">
                     <div class="link-info">
-                        <div class="link-name">Github仓库</div>
-                        <div class="link-desc">网页源码 · 求求了点个Star吧</div>
+                        <div class="link-name">Github 仓库</div>
+                        <div class="link-desc">网页源码 · 求 Star </div>
                     </div>
                     <div class="link-arrow">→</div>
                 </a>
+            </div>
+        </div>
+
+        
+        <!-- 其他 ACGN 群 -->
+        <div class="link-section">
+            <div class="link-section-title">其他 ACGN 群 <span style="font-size: 0.8rem; color: var(--text-sub); font-weight: normal; margin-left: 8px;">（由小灯台学姐整理）</span></div>
+            <div id="other-groups-container" class="link-grid">
+                <p style="color: var(--text-sub); font-size: 0.9rem;">正在加载同好群列表...</p>
             </div>
         </div>
     </div>
@@ -107,6 +116,35 @@
             sakura.style.animationDelay = Math.random() * 5 + 's';
             sakuraBg.appendChild(sakura);
         }
+    </script>
+    <script>
+        async function loadOtherGroups() {
+            const container = document.getElementById('other-groups-container');
+            try {
+                const res = await fetch('../static/data/groups.json');
+                if (!res.ok) throw new Error('网络请求失败');
+                const data = await res.json();
+                
+                let html = '';
+                data.forEach(group => {
+                    html += `<a href="${group.link}" target="_blank" rel="noopener" class="link-card group-card">
+                        <img src="${group.avatar}" alt="${group.name}" class="group-avatar" onerror="this.src='../static/image/sakura.png'">
+                        <div class="link-info">
+                            <div class="link-name">${group.name}</div>
+                            <div class="group-meta">
+                                <span class="group-tag">${group.tag}</span>
+                                <span class="group-qq">群号：${group.qq}</span>
+                            </div>
+                        </div>
+                    </a>`;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                console.error('加载群列表失败:', e);
+                container.innerHTML = '<p style="color: #b04e62; font-size: 0.9rem;">⚠ 同好群数据加载失败，请通过服务器环境访问。</p>';
+            }
+        }
+        loadOtherGroups();
     </script>
     <script src="../static/music-player.js" data-src="../static/music/music.mp3"></script>
 </body>
