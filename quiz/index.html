@@ -16,36 +16,36 @@
             <!-- ===== 用户信息栏 ===== -->
             <div class="user-bar" id="user-bar"></div>
 
-            <h1>🎯 科高樱花社 · ACGN 小测试</h1>
+            <h1>ACGN 小测试</h1>
 
             <!-- ===== 难度选择 ===== -->
             <div class="rank-tabs" style="margin-bottom: 20px;">
-                <button class="rank-tab active" data-difficulty="easy" onclick="switchDifficulty('easy')">🌸 简单模式</button>
-                <button class="rank-tab" data-difficulty="hard" onclick="switchDifficulty('hard')">🔥 困难模式</button>
+                <button class="rank-tab active" data-difficulty="easy" onclick="switchDifficulty('easy')">简单模式</button>
+                <button class="rank-tab" data-difficulty="hard" onclick="switchDifficulty('hard')">困难模式</button>
             </div>
 
-            <p style="text-align:center;color:#666;margin-bottom:24px;">选择一个玩法开始挑战吧～</p>
+            <p style="text-align:center;color:var(--text-sub);margin-bottom:24px;">选择一个玩法开始挑战吧</p>
 
             <!-- ===== 玩法选择 ===== -->
             <div class="mode-grid">
                 <a href="play.html?mode=normal&difficulty=easy" id="mode-normal" class="mode-card">
-                    <div class="icon">📖</div>
+                    <div class="icon-seal" style="margin: 0 auto 12px;">普</div>
                     <h3>普通模式</h3>
                     <p>随机抽取 15 题<br>可返回上一题修改答案</p>
                 </a>
                 <a href="play.html?mode=endless&difficulty=easy" id="mode-endless" class="mode-card">
-                    <div class="icon">📚</div>
+                    <div class="icon-seal" style="margin: 0 auto 12px;">无</div>
                     <h3>无尽模式</h3>
                     <p>全部题目打乱<br>答错 10 题后结束挑战</p>
                 </a>
             </div>
 
-            <h2 style="text-align:center;color:var(--sakura-dark);font-size:1.3rem;margin-bottom:16px;">🏆 排行榜</h2>
+            <h2 style="text-align:center;color:var(--text-main);font-size:1.3rem;margin-bottom:16px;">排行榜</h2>
 
             <!-- ===== 排行榜：难度 + 模式 双层标签 ===== -->
             <div class="rank-tabs">
-                <button class="rank-tab active" data-rank-diff="easy" onclick="switchRankDiff('easy')">🌸 简单</button>
-                <button class="rank-tab" data-rank-diff="hard" onclick="switchRankDiff('hard')">🔥 困难</button>
+                <button class="rank-tab active" data-rank-diff="easy" onclick="switchRankDiff('easy')">简单</button>
+                <button class="rank-tab" data-rank-diff="hard" onclick="switchRankDiff('hard')">困难</button>
             </div>
             <div class="rank-tabs">
                 <button class="rank-tab active" data-rank-mode="normal" onclick="switchRankMode('normal')">普通模式</button>
@@ -64,12 +64,11 @@
 
     <script src="../static/supabase-client.js"></script>
     <script>
-        let currentDifficulty = 'easy';   // 玩法选择用的难度
-        let rankDifficulty = 'easy';      // 排行榜用的难度
-        let rankMode = 'normal';          // 排行榜用的模式
+        let currentDifficulty = 'easy';   
+        let rankDifficulty = 'easy';      
+        let rankMode = 'normal';          
         let currentUser = null;
 
-        // ===== 渲染用户信息栏 =====
         function renderUserBar() {
             const bar = document.getElementById('user-bar');
             if (currentUser) {
@@ -82,13 +81,12 @@
                 `;
             } else {
                 bar.innerHTML = `
-                    <span style="color:#999;font-size:0.85rem;">未登录</span>
-                    <button class="btn-login-sm" onclick="signInWithGitHub()">🐙 使用 GitHub 登录</button>
+                    <span style="color:var(--text-sub);font-size:0.85rem;">未登录</span>
+                    <button class="btn-login-sm" onclick="signInWithGitHub()">使用 GitHub 登录</button>
                 `;
             }
         }
 
-        // ===== 登录 / 退出 =====
         async function signInWithGitHub() {
             await supabaseClient.auth.signInWithOAuth({
                 provider: 'github',
@@ -102,18 +100,15 @@
             renderUserBar();
         }
 
-        // ===== 切换难度（玩法选择区） =====
         function switchDifficulty(diff) {
             currentDifficulty = diff;
             document.querySelectorAll('[data-difficulty]').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.difficulty === diff);
             });
-            // 更新模式卡片链接
             document.getElementById('mode-normal').href = `play.html?mode=normal&difficulty=${diff}`;
             document.getElementById('mode-endless').href = `play.html?mode=endless&difficulty=${diff}`;
         }
 
-        // ===== 切换排行榜难度 / 模式 =====
         function switchRankDiff(diff) {
             rankDifficulty = diff;
             document.querySelectorAll('[data-rank-diff]').forEach(btn => {
@@ -130,7 +125,6 @@
             loadRank(rankMode, rankDifficulty);
         }
 
-        // ===== 加载排行榜 =====
         async function loadRank(mode, difficulty) {
             const listEl = document.getElementById('rank-list');
             listEl.innerHTML = '<p class="rank-empty">正在加载...</p>';
@@ -155,9 +149,11 @@
 
             listEl.innerHTML = data.map((item, i) => {
                 const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+                // 使用 01, 02, 03 替代 Emoji 奖牌，其他排名直接显示数字
+                let rankNum = i < 3 ? `0${i + 1}` : (i + 1).toString();
+                
                 return `<div class="rank-item">
-                    <span class="rank-no ${rankClass}">${medal}</span>
+                    <span class="rank-no ${rankClass}">${rankNum}</span>
                     <img class="rank-avatar" src="${item.avatar_url || ''}" alt="">
                     <span class="rank-name">${item.username}</span>
                     <span class="rank-score">${item.score} 分</span>
@@ -172,24 +168,21 @@
             return m > 0 ? `${m}分${s}秒` : `${s}秒`;
         }
 
-        // ===== 初始化 =====
         async function init() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             currentUser = session ? session.user : null;
             renderUserBar();
-            switchDifficulty(currentDifficulty);   // 初始化模式卡片链接
+            switchDifficulty(currentDifficulty);   
             loadRank(rankMode, rankDifficulty);
         }
 
         init();
 
-        // ===== 监听登录状态变化 =====
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             currentUser = session ? session.user : null;
             renderUserBar();
 
             if (session) {
-                // 登录后尝试提交暂存的成绩
                 const pending = localStorage.getItem('pending_score');
                 if (pending) {
                     try {
@@ -243,7 +236,6 @@
             }
         });
 
-        // 樱花飘落
         const sakuraBg = document.getElementById('sakura-bg');
         for (let i = 0; i < 30; i++) {
             const s = document.createElement('div');
