@@ -3,8 +3,9 @@ const client = new Appwrite.Client()
     .setProject('6aec1bf700268c3dd42c');
 
 const account = new Appwrite.Account(client);
-const databases = new Appwrite.Databases(client);
+const tablesDB = new Appwrite.TablesDB(client);
 const Query = Appwrite.Query;
+const ID = Appwrite.ID;
 
 const DATABASE_ID = '6aec2098000c2aac39d0';
 const TABLE_ID = '6aec21390031cbdfea27';
