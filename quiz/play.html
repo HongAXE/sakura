@@ -82,6 +82,17 @@
 
             try {
                 currentUser = await account.get();
+                try {
+                    const identities = await account.listIdentities();
+                    const gh = identities.identities.find(id => id.provider === 'github');
+                    if (gh) {
+                        currentUser.avatarUrl = `https://avatars.githubusercontent.com/u/${gh.providerUid}?v=4`;
+                    } else {
+                        currentUser.avatarUrl = `https://github.com/${currentUser.name}.png`;
+                    }
+                } catch (e) {
+                    currentUser.avatarUrl = `https://github.com/${currentUser.name}.png`;
+                }
             } catch (e) {
                 currentUser = null;
             }
@@ -276,7 +287,7 @@
                                  (score === existingData[0].score && timeSeconds < existingData[0].time_seconds);
 
                 if (isBetter) {
-                    const avatarUrl = `https://github.com/${currentUser.name}.png`;
+                    const avatarUrl = currentUser.avatarUrl;
                     const payload = {
                         user_id: currentUser.$id,
                         username: currentUser.name,
@@ -291,11 +302,11 @@
                         if (window.isNewTables) {
                             await db.updateRow({
                                 databaseId: DATABASE_ID, tableId: TABLE_ID, rowId: existingData[0].$id,
-                                data: { score: score, time_seconds: timeSeconds }
+                                data: { score: score, time_seconds: timeSeconds, avatar_url: avatarUrl, username: currentUser.name }
                             });
                         } else {
                             await db.updateDocument(DATABASE_ID, TABLE_ID, existingData[0].$id, {
-                                score: score, time_seconds: timeSeconds
+                                score: score, time_seconds: timeSeconds, avatar_url: avatarUrl, username: currentUser.name
                             });
                         }
                         statusEl.innerText = '>> 已更新你的最佳成绩';
