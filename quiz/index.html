@@ -133,20 +133,28 @@
             listEl.innerHTML = '<p class="rank-empty">正在加载...</p>';
 
             try {
-                // 使用 TablesDB 的 listRows
-                const response = await tablesDB.listRows({
-                    databaseId: DATABASE_ID,
-                    tableId: TABLE_ID,
-                    queries: [
-                        Query.equal('mode', mode),
-                        Query.equal('difficulty', difficulty),
-                        Query.orderDesc('score'),
-                        Query.orderAsc('time_seconds'),
-                        Query.limit(50)
-                    ]
-                });
+                let data = [];
+                const queries = [
+                    Query.equal('mode', mode),
+                    Query.equal('difficulty', difficulty),
+                    Query.orderDesc('score'),
+                    Query.orderAsc('time_seconds'),
+                    Query.limit(50)
+                ];
 
-                const data = response.rows; // 返回的数据在 rows 里
+                // 根据 SDK 类型执行不同的查询方法
+                if (window.isNewTables) {
+                    const response = await db.listRows({
+                        databaseId: DATABASE_ID,
+                        tableId: TABLE_ID,
+                        queries: queries
+                    });
+                    data = response.rows;
+                } else {
+                    const response = await db.listDocuments(DATABASE_ID, TABLE_ID, queries);
+                    data = response.documents;
+                }
+
                 if (data.length === 0) {
                     listEl.innerHTML = '<p class="rank-empty">还没有成绩，快来抢第一吧！</p>';
                     return;
@@ -165,8 +173,8 @@
                     </div>`;
                 }).join('');
             } catch (error) {
-                console.error('加载排行榜失败:', error);
-                listEl.innerHTML = '<p class="rank-empty">排行榜加载失败</p>';
+                console.error('加载排行榜详细错误:', error);
+                listEl.innerHTML = `<p class="rank-empty">排行榜加载失败: ${error.message}</p>`;
             }
         }
 
@@ -202,44 +210,56 @@
             if (!currentUser) return;
             
             try {
-                const existing = await tablesDB.listRows({
-                    databaseId: DATABASE_ID,
-                    tableId: TABLE_ID,
-                    queries: [
-                        Query.equal('user_id', currentUser.$id),
-                        Query.equal('mode', p.mode),
-                        Query.equal('difficulty', p.difficulty)
-                    ]
-                });
+                let existingData = [];
+                const queries = [
+                    Query.equal('user_id', currentUser.$id),
+                    Query.equal('mode', p.mode),
+                    Query.equal('difficulty', p.difficulty)
+                ];
 
-                const isBetter = existing.total === 0 || 
-                                 p.score > existing.rows[0].score ||
-                                 (p.score === existing.rows[0].score && p.time_seconds < existing.rows[0].time_seconds);
+                if (window.isNewTables) {
+                    const existing = await db.listRows({ databaseId: DATABASE_ID, tableId: TABLE_ID, queries: queries });
+                    existingData = existing.rows;
+                } else {
+                    const existing = await db.listDocuments(DATABASE_ID, TABLE_ID, queries);
+                    existingData = existing.documents;
+                }
+
+                const isBetter = existingData.length === 0 || 
+                                 p.score > existingData[0].score ||
+                                 (p.score === existingData[0].score && p.time_seconds < existingData[0].time_seconds);
 
                 if (isBetter) {
                     const avatarUrl = `https://github.com/${currentUser.name}.png`;
-                    if (existing.total > 0) {
-                        await tablesDB.updateRow({
-                            databaseId: DATABASE_ID,
-                            tableId: TABLE_ID,
-                            rowId: existing.rows[0].$id,
-                            data: { score: p.score, time_seconds: p.time_seconds }
-                        });
+                    const payload = {
+                        user_id: currentUser.$id,
+                        username: currentUser.name,
+                        avatar_url: avatarUrl,
+                        mode: p.mode,
+                        difficulty: p.difficulty,
+                        score: p.score,
+                        time_seconds: p.time_seconds
+                    };
+
+                    if (existingData.length > 0) {
+                        if (window.isNewTables) {
+                            await db.updateRow({
+                                databaseId: DATABASE_ID, tableId: TABLE_ID, rowId: existingData[0].$id,
+                                data: { score: p.score, time_seconds: p.time_seconds }
+                            });
+                        } else {
+                            await db.updateDocument(DATABASE_ID, TABLE_ID, existingData[0].$id, {
+                                score: p.score, time_seconds: p.time_seconds
+                            });
+                        }
                     } else {
-                        await tablesDB.createRow({
-                            databaseId: DATABASE_ID,
-                            tableId: TABLE_ID,
-                            rowId: ID.unique(),
-                            data: {
-                                user_id: currentUser.$id,
-                                username: currentUser.name,
-                                avatar_url: avatarUrl,
-                                mode: p.mode,
-                                difficulty: p.difficulty,
-                                score: p.score,
-                                time_seconds: p.time_seconds
-                            }
-                        });
+                        if (window.isNewTables) {
+                            await db.createRow({
+                                databaseId: DATABASE_ID, tableId: TABLE_ID, rowId: ID.unique(), data: payload
+                            });
+                        } else {
+                            await db.createDocument(DATABASE_ID, TABLE_ID, ID.unique(), payload);
+                        }
                     }
                 }
             } catch (e) {
