@@ -175,12 +175,13 @@
                     const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
                     let rankNum = i < 3 ? `0${i + 1}` : (i + 1).toString();
                     
-                    return `<div class="rank-item">
-                        <span class="rank-no ${rankClass}">${rankNum}</span>
-                        <img class="rank-avatar" src="${item.avatar_url || ''}" alt="">
-                        <span class="rank-name">${item.username}</span>
-                        <span class="rank-score">${item.score} 分</span>
-                        <span class="rank-time">${formatTime(item.time_seconds)}</span>
+                    // 增加了内联样式，修复名字被截断的问题
+                    return `<div class="rank-item" style="display:flex; align-items:center; gap:12px; width:100%;">
+                        <span class="rank-no ${rankClass}" style="flex-shrink:0;">${rankNum}</span>
+                        <img class="rank-avatar" src="${item.avatar_url || ''}" alt="" style="width:36px; height:36px; object-fit:cover; flex-shrink:0;">
+                        <span class="rank-name" style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.username}</span>
+                        <span class="rank-score" style="flex-shrink:0; margin-left:auto;">${item.score} 分</span>
+                        <span class="rank-time" style="flex-shrink:0;">${formatTime(item.time_seconds)}</span>
                     </div>`;
                 }).join('');
             } catch (error) {
