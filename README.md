@@ -1,7 +1,6 @@
 # 科高樱花社 · 官方网站
 
 > 深圳科学高中樱花社（ACGN 同好会）官方网站  
-> 历久弥新 · 记录社团的点点滴滴
 
 [![Website](https://img.shields.io/badge/Website-hongaxe.github.io%2Fsakura-ffb7c5?style=flat-square)](https://hongaxe.github.io/sakura/)
 [![License](https://img.shields.io/badge/License-MIT-e05a6d?style=flat-square)](#版权与许可)
@@ -23,8 +22,8 @@
 | **主页** | 社团 badge、社徽展示、S.O.S. 团致敬文案、像素风快捷入口 |
 | **社史** | 时间线形式记录，配有历史图片；历届干部与指导老师数据通过 JSON 动态渲染；提供 Word/PDF 原稿下载 |
 | **小测试** | 分为 **简单** 、 **困难** 双题库，普通模式（抽 15 题、可回退）与无尽模式（全题库乱序、累计错 10 题结束） |
-| **排行榜** | 按「分数降序 → 用时升序」排名，每人每模式仅保留最好成绩（基于 Supabase） |
-| **留言板** | 使用 GitHub 登录，每人限一条留言，可修改（基于 Supabase） |
+| **排行榜** | 按「分数降序 → 用时升序」排名，每人每模式仅保留最好成绩（基于 Appwrite Cloud） |
+| **留言板** | 使用 GitHub 登录，每人限一条留言，可修改（基于 Giscus） |
 | **相关链接** | 衍生平台、友情站点、其他ACGN群 |
 | **背景音乐** | 进入页面自动尝试播放，右上角悬浮开关，支持跨页续播 |
 | **访问统计** | 页脚展示本站总访问量（基于 Vercount 服务） |
@@ -101,7 +100,8 @@ Sakura/
 │   │   └── music.mp3           # 背景音乐
 │   ├── music-player.js         # 背景音乐播放器
 │   ├── sakura.css              # 全站公共样式
-│   └── supabase-client.js      # Supabase 客户端配置
+│   ├── giscus-sakura.css        # Giscus 样式
+│   └── appwrite-client.js      # Appwrite 客户端配置 (排行榜)
 ├── index.html                  # 主页
 ├── LICENSE
 └── README.md
@@ -131,19 +131,20 @@ Sakura/
 
 ##  使用技术
 
-- **纯静态**：HTML5 + CSS3 + 原生 JavaScript
+- **静态页面**：HTML5 + CSS3 + 原生 JavaScript
 - **背景音乐**：HTML5 Audio API，配合 localStorage 实现跨页续播
-- **认证与数据库**：Supabase（GitHub OAuth + PostgreSQL）
+- **排行榜**：Appwrite Cloud（GitHub OAuth + TablesDB）
+- **留言板**：Giscus (基于 GitHub Discussions)
 - **访问统计**：Vercount
-- **动画**：CSS Keyframes
-- **部署**：GitHub Pages
+- **背景动画**：CSS Keyframes
+- **网页部署**：GitHub Pages
 
 ---
 
 
 ##  贡献反馈
 
-· 如发现页面 bug、样式问题或有内容补充，欢迎提交 Issue 或 Pull Request。
+· 如发现页面 BUG、样式问题或有内容补充，欢迎提交 Issue 。
 · 如果你也是科高樱花社成员，并希望参与网站维护，请联系现任社长或开发者。
 
 ---
