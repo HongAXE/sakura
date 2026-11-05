@@ -4,164 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>留言板 · 科高樱花社</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 如果不再用 Supabase，原来那行 CDN 引入可以删掉 -->
     <link rel="stylesheet" href="../static/sakura.css">
 </head>
 <body>
     <div class="comment-container">
         <div class="comment-card">
             <h1>留言板</h1>
-            <div id="auth-section"></div>
-            <div id="comment-section" style="display: none;">
-                <textarea id="comment-input" placeholder="写下你的留言..."></textarea>
-                <button id="submit-btn">提交留言</button>
-            </div>
-            <div id="comment-display"></div>
-            <div style="text-align:center;">
+            
+            <!-- Giscus 评论区容器 -->
+            <div class="giscus"></div>
+
+            <div style="text-align:center; margin-top: 24px;">
                 <a href="../" class="back-home-btn">← 返回主页</a>
             </div>
         </div>
     </div>
 
-    <script>
-        const supabaseClient = supabase.createClient(
-            'https://gkkpmsghlxyjfccuuqha.supabase.co',
-            'sb_publishable_G_yfJ_sDdHZhRTeOxCIEHA_rQhgFkKG'
-        );
-
-        let currentUser = null;
-        let existingComment = null;
-
-        async function signInWithGitHub() {
-            await supabaseClient.auth.signInWithOAuth({
-                provider: 'github',
-                options: {
-                    redirectTo: 'https://hongaxe.github.io/sakura/comment/'
-                }
-            });
-        }
-
-        async function signOut() {
-            await supabaseClient.auth.signOut();
-            currentUser = null;
-            existingComment = null;
-            render();
-        }
-
-        async function loadMyComment() {
-            if (!currentUser) return;
-            const { data } = await supabaseClient
-                .from('comments')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .maybeSingle();
-            existingComment = data;
-        }
-
-        async function submitComment() {
-            const content = document.getElementById('comment-input').value.trim();
-            if (!content) {
-                alert('留言内容不能为空哦～');
-                return;
-            }
-
-            if (existingComment) {
-                const { error } = await supabaseClient.from('comments')
-                    .update({ content, updated_at: new Date() })
-                    .eq('user_id', currentUser.id);
-                if (error) { alert('更新失败：' + error.message); return; }
-            } else {
-                const { error } = await supabaseClient.from('comments').insert({
-                    user_id: currentUser.id,
-                    username: currentUser.user_metadata.user_name,
-                    avatar_url: currentUser.user_metadata.avatar_url,
-                    content
-                });
-                if (error) { alert('提交失败：' + error.message); return; }
-            }
-            await loadMyComment();
-            render();
-        }
-
-        function render() {
-            const authSection = document.getElementById('auth-section');
-            if (currentUser) {
-                authSection.innerHTML = `<p style="color:#666;font-size:0.9rem;margin-bottom:8px;">
-                    已登录：<strong style="color:#e05a6d;">${currentUser.user_metadata.user_name}</strong>
-                    <button class="logout-btn" onclick="signOut()">退出</button>
-                </p>`;
-            } else {
-                authSection.innerHTML = `<button class="login-btn" onclick="signInWithGitHub()">使用 GitHub 登录</button>`;
-            }
-
-            const commentSection = document.getElementById('comment-section');
-            if (currentUser) {
-                commentSection.style.display = 'block';
-                if (existingComment) {
-                    document.getElementById('comment-input').value = existingComment.content;
-                    document.getElementById('submit-btn').textContent = '更新留言';
-                } else {
-                    document.getElementById('comment-input').value = '';
-                    document.getElementById('submit-btn').textContent = '提交留言';
-                }
-            } else {
-                commentSection.style.display = 'none';
-            }
-            loadAllComments();
-        }
-
-        async function loadAllComments() {
-            const { data, error } = await supabaseClient
-                .from('comments')
-                .select('*')
-                .order('updated_at', { ascending: false });
-            if (error) {
-                document.getElementById('comment-display').innerHTML =
-                    '<p style="text-align:center;color:#e05a6d;">留言加载失败：' + error.message + '</p>';
-                return;
-            }
-            if (!data || data.length === 0) {
-                document.getElementById('comment-display').innerHTML =
-                    '<p style="text-align:center;color:#999;">还没有留言，来抢沙发吧～</p>';
-                return;
-            }
-            document.getElementById('comment-display').innerHTML = data.map(c =>
-                `<div class="comment-item">
-                    <img src="${c.avatar_url}" width="36" height="36" alt="avatar">
-                    <div style="flex:1;min-width:0;">
-                        <strong>${c.username}</strong>
-                        <p>${c.content}</p>
-                    </div>
-                </div>`
-            ).join('');
-        }
-
-        // ===== 关键修复：监听认证状态变化 =====
-        supabaseClient.auth.onAuthStateChange(async (event, session) => {
-            console.log('Auth event:', event);
-            if (session) {
-                currentUser = session.user;
-                await loadMyComment();
-            } else {
-                currentUser = null;
-                existingComment = null;
-            }
-            render();
-        });
-
-        // 初始化
-        async function init() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                currentUser = session.user;
-                await loadMyComment();
-            }
-            render();
-        }
-        init();
-
-        document.getElementById('submit-btn').addEventListener('click', submitComment);
+    <!-- Giscus 的专属脚本 -->
+    <script src="https://giscus.app/client.js"
+            data-repo="HongAXE/sakura"
+            data-repo-id="R_kgDOU1oMng"
+            data-category="Comments"
+            data-category-id="DIC_kwDOU1oMns4DKa7B"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="bottom"
+            data-theme="https://hongaxe.github.io/sakura/static/giscus-sakura.css"  
+            data-lang="zh-CN"
+            crossorigin="anonymous"
+            async>
     </script>
+
+    <!-- 保留音乐播放器 -->
     <script src="../static/music-player.js" data-src="../static/music/music.mp3"></script>
 </body>
 </html>
