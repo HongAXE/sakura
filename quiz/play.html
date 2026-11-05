@@ -256,55 +256,67 @@
             scoreSubmitted = true;
 
             try {
-                // 替换为 TablesDB API
-                const existing = await tablesDB.listRows({
-                    databaseId: DATABASE_ID,
-                    tableId: TABLE_ID,
-                    queries: [
-                        Query.equal('user_id', currentUser.$id),
-                        Query.equal('mode', mode),
-                        Query.equal('difficulty', difficulty)
-                    ]
-                });
+                let existingData = [];
+                const queries = [
+                    Query.equal('user_id', currentUser.$id),
+                    Query.equal('mode', mode),
+                    Query.equal('difficulty', difficulty)
+                ];
 
-                const isBetter = existing.total === 0 || 
-                                 score > existing.rows[0].score ||
-                                 (score === existing.rows[0].score && timeSeconds < existing.rows[0].time_seconds);
+                if (window.isNewTables) {
+                    const existing = await db.listRows({ databaseId: DATABASE_ID, tableId: TABLE_ID, queries: queries });
+                    existingData = existing.rows;
+                } else {
+                    const existing = await db.listDocuments(DATABASE_ID, TABLE_ID, queries);
+                    existingData = existing.documents;
+                }
+
+                const isBetter = existingData.length === 0 || 
+                                 score > existingData[0].score ||
+                                 (score === existingData[0].score && timeSeconds < existingData[0].time_seconds);
 
                 if (isBetter) {
                     const avatarUrl = `https://github.com/${currentUser.name}.png`;
-                    if (existing.total > 0) {
-                        await tablesDB.updateRow({
-                            databaseId: DATABASE_ID,
-                            tableId: TABLE_ID,
-                            rowId: existing.rows[0].$id,
-                            data: { score: score, time_seconds: timeSeconds }
-                        });
+                    const payload = {
+                        user_id: currentUser.$id,
+                        username: currentUser.name,
+                        avatar_url: avatarUrl,
+                        mode: mode,
+                        difficulty: difficulty,
+                        score: score,
+                        time_seconds: timeSeconds
+                    };
+
+                    if (existingData.length > 0) {
+                        if (window.isNewTables) {
+                            await db.updateRow({
+                                databaseId: DATABASE_ID, tableId: TABLE_ID, rowId: existingData[0].$id,
+                                data: { score: score, time_seconds: timeSeconds }
+                            });
+                        } else {
+                            await db.updateDocument(DATABASE_ID, TABLE_ID, existingData[0].$id, {
+                                score: score, time_seconds: timeSeconds
+                            });
+                        }
                         statusEl.innerText = '>> 已更新你的最佳成绩';
                     } else {
-                        await tablesDB.createRow({
-                            databaseId: DATABASE_ID,
-                            tableId: TABLE_ID,
-                            rowId: ID.unique(),
-                            data: {
-                                user_id: currentUser.$id,
-                                username: currentUser.name,
-                                avatar_url: avatarUrl,
-                                mode: mode,
-                                difficulty: difficulty,
-                                score: score,
-                                time_seconds: timeSeconds
-                            }
-                        });
+                        if (window.isNewTables) {
+                            await db.createRow({
+                                databaseId: DATABASE_ID, tableId: TABLE_ID, rowId: ID.unique(), data: payload
+                            });
+                        } else {
+                            await db.createDocument(DATABASE_ID, TABLE_ID, ID.unique(), payload);
+                        }
                         statusEl.innerText = '>> 成绩已记录到排行榜';
                     }
                     localStorage.removeItem('pending_score');
                 } else {
-                    statusEl.innerText = `<< 本次成绩未超过你的最佳记录（${existing.rows[0].score} 分 / ${formatTime(existing.rows[0].time_seconds)}）`;
+                    statusEl.innerText = `<< 本次成绩未超过你的最佳记录（${existingData[0].score} 分 / ${formatTime(existingData[0].time_seconds)}）`;
                     localStorage.removeItem('pending_score');
                 }
             } catch (e) {
                 scoreSubmitted = false;
+                console.error("成绩提交详细错误:", e);
                 statusEl.innerHTML = '成绩提交失败：' + e.message +
                     '<br><a href="javascript:void(0)" onclick="retrySubmit()" style="color:var(--sakura-dark);font-weight:600;">点此重试</a>';
             }
