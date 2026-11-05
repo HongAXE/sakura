@@ -68,6 +68,18 @@
         async function checkUser() {
             try {
                 currentUser = await account.get();
+                // 获取准确的 GitHub 头像
+                try {
+                    const identities = await account.listIdentities();
+                    const gh = identities.identities.find(id => id.provider === 'github');
+                    if (gh) {
+                        currentUser.avatarUrl = `https://avatars.githubusercontent.com/u/${gh.providerUid}?v=4`;
+                    } else {
+                        currentUser.avatarUrl = `https://github.com/${currentUser.name}.png`;
+                    }
+                } catch (e) {
+                    currentUser.avatarUrl = `https://github.com/${currentUser.name}.png`;
+                }
             } catch (e) {
                 currentUser = null;
             }
@@ -78,7 +90,7 @@
             const bar = document.getElementById('user-bar');
             if (currentUser) {
                 const name = currentUser.name || 'User';
-                const avatar = `https://github.com/${name}.png`;
+                const avatar = currentUser.avatarUrl;
                 bar.innerHTML = `
                     <img src="${avatar}" alt="${name}">
                     <span class="user-name">${name}</span>
@@ -142,7 +154,6 @@
                     Query.limit(50)
                 ];
 
-                // 根据 SDK 类型执行不同的查询方法
                 if (window.isNewTables) {
                     const response = await db.listRows({
                         databaseId: DATABASE_ID,
@@ -230,7 +241,7 @@
                                  (p.score === existingData[0].score && p.time_seconds < existingData[0].time_seconds);
 
                 if (isBetter) {
-                    const avatarUrl = `https://github.com/${currentUser.name}.png`;
+                    const avatarUrl = currentUser.avatarUrl;
                     const payload = {
                         user_id: currentUser.$id,
                         username: currentUser.name,
@@ -245,11 +256,11 @@
                         if (window.isNewTables) {
                             await db.updateRow({
                                 databaseId: DATABASE_ID, tableId: TABLE_ID, rowId: existingData[0].$id,
-                                data: { score: p.score, time_seconds: p.time_seconds }
+                                data: { score: p.score, time_seconds: p.time_seconds, avatar_url: avatarUrl, username: currentUser.name }
                             });
                         } else {
                             await db.updateDocument(DATABASE_ID, TABLE_ID, existingData[0].$id, {
-                                score: p.score, time_seconds: p.time_seconds
+                                score: p.score, time_seconds: p.time_seconds, avatar_url: avatarUrl, username: currentUser.name
                             });
                         }
                     } else {
