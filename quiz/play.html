@@ -286,45 +286,51 @@
                                  score > existingData[0].score ||
                                  (score === existingData[0].score && timeSeconds < existingData[0].time_seconds);
 
-                if (isBetter) {
-                    const avatarUrl = currentUser.avatarUrl;
-                    const payload = {
-                        user_id: currentUser.$id,
-                        username: currentUser.name,
-                        avatar_url: avatarUrl,
-                        mode: mode,
-                        difficulty: difficulty,
-                        score: score,
-                        time_seconds: timeSeconds
-                    };
+                const avatarUrl = currentUser.avatarUrl;
+                const payload = {
+                    user_id: currentUser.$id,
+                    username: currentUser.name,
+                    avatar_url: avatarUrl,
+                    mode: mode,
+                    difficulty: difficulty,
+                    score: score,
+                    time_seconds: timeSeconds
+                };
 
-                    if (existingData.length > 0) {
-                        if (window.isNewTables) {
-                            await db.updateRow({
-                                databaseId: DATABASE_ID, tableId: TABLE_ID, rowId: existingData[0].$id,
-                                data: { score: score, time_seconds: timeSeconds, avatar_url: avatarUrl, username: currentUser.name }
-                            });
-                        } else {
-                            await db.updateDocument(DATABASE_ID, TABLE_ID, existingData[0].$id, {
-                                score: score, time_seconds: timeSeconds, avatar_url: avatarUrl, username: currentUser.name
-                            });
-                        }
-                        statusEl.innerText = '>> 已更新你的最佳成绩';
-                    } else {
-                        if (window.isNewTables) {
-                            await db.createRow({
-                                databaseId: DATABASE_ID, tableId: TABLE_ID, rowId: ID.unique(), data: payload
-                            });
-                        } else {
-                            await db.createDocument(DATABASE_ID, TABLE_ID, ID.unique(), payload);
-                        }
-                        statusEl.innerText = '>> 成绩已记录到排行榜';
+                if (existingData.length > 0) {
+                    // 如果已经有记录，无论如何都更新头像和昵称，顺便更新成绩（如果更好的话）
+                    const updateData = { 
+                        avatar_url: avatarUrl, 
+                        username: currentUser.name 
+                    };
+                    if (isBetter) {
+                        updateData.score = score;
+                        updateData.time_seconds = timeSeconds;
                     }
-                    localStorage.removeItem('pending_score');
+
+                    if (window.isNewTables) {
+                        await db.updateRow({
+                            databaseId: DATABASE_ID, tableId: TABLE_ID, rowId: existingData[0].$id,
+                            data: updateData
+                        });
+                    } else {
+                        await db.updateDocument(DATABASE_ID, TABLE_ID, existingData[0].$id, updateData);
+                    }
+                    
+                    statusEl.innerText = isBetter ? '>> 已更新你的最佳成绩' : `<< 本次成绩未超过最佳记录（${existingData[0].score} 分），但已更新你的头像`;
                 } else {
-                    statusEl.innerText = `<< 本次成绩未超过你的最佳记录（${existingData[0].score} 分 / ${formatTime(existingData[0].time_seconds)}）`;
-                    localStorage.removeItem('pending_score');
+                    // 创建新记录
+                    if (window.isNewTables) {
+                        await db.createRow({
+                            databaseId: DATABASE_ID, tableId: TABLE_ID, rowId: ID.unique(), data: payload
+                        });
+                    } else {
+                        await db.createDocument(DATABASE_ID, TABLE_ID, ID.unique(), payload);
+                    }
+                    statusEl.innerText = '>> 成绩已记录到排行榜';
                 }
+                localStorage.removeItem('pending_score');
+                
             } catch (e) {
                 scoreSubmitted = false;
                 console.error("成绩提交详细错误:", e);
