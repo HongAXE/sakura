@@ -175,13 +175,17 @@
                     const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
                     let rankNum = i < 3 ? `0${i + 1}` : (i + 1).toString();
                     
-                    // 强制使用 Grid 布局：40px(排名) + 36px(头像) + 1fr(名字) + 60px(分数) + 60px(时间)
-                    return `<div class="rank-item" style="display: grid; grid-template-columns: 40px 36px 1fr 60px 60px; align-items: center; gap: 10px; width: 100%; margin-bottom: 8px;">
-                        <span class="rank-no ${rankClass}" style="text-align: left;">${rankNum}</span>
-                        <img class="rank-avatar" src="${item.avatar_url || ''}" alt="" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px;">
-                        <span class="rank-name" style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left;">${item.username}</span>
-                        <span class="rank-score" style="text-align: right;">${item.score} 分</span>
-                        <span class="rank-time" style="text-align: right;">${formatTime(item.time_seconds)}</span>
+                    // 使用 minmax(0, 1fr) 保证名字在窄屏下不会被内容撑破，且分配剩余空间
+                    return `<div class="rank-item" style="display: grid; grid-template-columns: 32px 36px minmax(0, 1fr) auto auto; align-items: center; gap: 8px; width: 100%; padding: 12px 0; border-bottom: 1px dashed var(--border-color);">
+                        <span class="rank-no ${rankClass}" style="text-align: center; font-weight: bold; font-family: 'Zpix', monospace;">${rankNum}</span>
+                        
+                        <img class="rank-avatar" src="${item.avatar_url || ''}" alt="" style="width: 36px; height: 36px; object-fit: cover; border-radius: 2px; border: 1px solid var(--border-color);">
+                        
+                        <span class="rank-name" style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; font-size: 1rem;">${item.username}</span>
+                        
+                        <span class="rank-score" style="white-space: nowrap; text-align: right; font-weight: bold; color: var(--sakura-dark);">${item.score} 分</span>
+                        
+                        <span class="rank-time" style="white-space: nowrap; text-align: right; font-size: 0.85rem; color: var(--text-sub);">${formatTime(item.time_seconds)}</span>
                     </div>`;
                 }).join('');
             } catch (error) {
