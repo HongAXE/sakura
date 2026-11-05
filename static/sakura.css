@@ -1224,3 +1224,7 @@ footer {
 .btn-card:hover span {
     color: var(--sakura-dark);
 }
+
+.giscus {
+    margin-top: 20px;
+}
