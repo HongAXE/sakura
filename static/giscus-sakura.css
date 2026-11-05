@@ -1,0 +1,31 @@
+/* 直接写在最外层 */
+  /* 背景：羊皮纸底色 */
+  --color-canvas-default: #f5f0e8;
+  --color-canvas-overlay: #ede6db;
+  --color-canvas-inset: #e8dfd3;
+  --color-canvas-subtle: #ede6db;
+
+  /* 文字：深褐 / 墨色 */
+  --color-fg-default: #3a2e28;
+  --color-fg-muted: #6b5d52;
+  --color-fg-subtle: #8a7a6e;
+
+  /* 边框：细硬边，无模糊 */
+  --color-border-default: #c4b5a5;
+  --color-border-muted: #d8cabb;
+
+  /* 强调色：朱红 */
+  --color-accent-fg: #c65353;
+  --color-accent-emphasis: #b04848;
+  --color-accent-muted: rgba(198, 83, 83, 0.15);
+
+  /* 按钮：复古硬朗 */
+  --color-btn-text: #3a2e28;
+  --color-btn-bg: #ede6db;
+  --color-btn-border: #c4b5a5;
+  --color-btn-hover-bg: #e0d4c4;
+  --color-btn-hover-border: #c65353;
+
+  /* 圆角：禁用大圆角 */
+  --border-radius: 0px;
+  --borderRadius: 0px;
