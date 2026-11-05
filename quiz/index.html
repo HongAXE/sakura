@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ACGN小测试 · 科高樱花社</title>
     <link rel="stylesheet" href="../static/sakura.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@17.0.0"></script>
 </head>
 <body>
     <div class="sakura-bg" id="sakura-bg"></div>
@@ -13,12 +13,10 @@
 
     <div class="container">
         <div class="quiz-card">
-            <!-- ===== 用户信息栏 ===== -->
             <div class="user-bar" id="user-bar"></div>
 
             <h1>ACGN 小测试</h1>
 
-            <!-- ===== 难度选择 ===== -->
             <div class="rank-tabs" style="margin-bottom: 20px;">
                 <button class="rank-tab active" data-difficulty="easy" onclick="switchDifficulty('easy')">简单模式</button>
                 <button class="rank-tab" data-difficulty="hard" onclick="switchDifficulty('hard')">困难模式</button>
@@ -26,7 +24,6 @@
 
             <p style="text-align:center;color:var(--text-sub);margin-bottom:24px;">选择一个玩法开始挑战吧</p>
 
-            <!-- ===== 玩法选择 ===== -->
             <div class="mode-grid">
                 <a href="play.html?mode=normal&difficulty=easy" id="mode-normal" class="mode-card">
                     <div class="icon-seal" style="margin: 0 auto 12px;">普</div>
@@ -42,7 +39,6 @@
 
             <h2 style="text-align:center;color:var(--text-main);font-size:1.3rem;margin-bottom:16px;">排行榜</h2>
 
-            <!-- ===== 排行榜：难度 + 模式 双层标签 ===== -->
             <div class="rank-tabs">
                 <button class="rank-tab active" data-rank-diff="easy" onclick="switchRankDiff('easy')">简单</button>
                 <button class="rank-tab" data-rank-diff="hard" onclick="switchRankDiff('hard')">困难</button>
@@ -62,18 +58,27 @@
         © 2026 深圳科学高中樱花社 · 由 HongAX 开发
     </footer>
 
-    <script src="../static/supabase-client.js"></script>
+    <script src="../static/appwrite-client.js"></script>
     <script>
         let currentDifficulty = 'easy';   
         let rankDifficulty = 'easy';      
         let rankMode = 'normal';          
         let currentUser = null;
 
+        async function checkUser() {
+            try {
+                currentUser = await account.get();
+            } catch (e) {
+                currentUser = null;
+            }
+            renderUserBar();
+        }
+
         function renderUserBar() {
             const bar = document.getElementById('user-bar');
             if (currentUser) {
-                const name = currentUser.user_metadata.user_name;
-                const avatar = currentUser.user_metadata.avatar_url || '';
+                const name = currentUser.name || 'User';
+                const avatar = `https://github.com/${name}.png`;
                 bar.innerHTML = `
                     <img src="${avatar}" alt="${name}">
                     <span class="user-name">${name}</span>
@@ -88,14 +93,12 @@
         }
 
         async function signInWithGitHub() {
-            await supabaseClient.auth.signInWithOAuth({
-                provider: 'github',
-                options: { redirectTo: location.href }
-            });
+            const redirectUrl = window.location.origin + window.location.pathname;
+            await account.createOAuth2Session('github', redirectUrl, redirectUrl);
         }
 
         async function signOut() {
-            await supabaseClient.auth.signOut();
+            await account.deleteSession('current');
             currentUser = null;
             renderUserBar();
         }
@@ -129,37 +132,42 @@
             const listEl = document.getElementById('rank-list');
             listEl.innerHTML = '<p class="rank-empty">正在加载...</p>';
 
-            const { data, error } = await supabaseClient
-                .from('scores')
-                .select('*')
-                .eq('mode', mode)
-                .eq('difficulty', difficulty)
-                .order('score', { ascending: false })
-                .order('time_seconds', { ascending: true })
-                .limit(50);
+            try {
+                // 使用 TablesDB 的 listRows
+                const response = await tablesDB.listRows({
+                    databaseId: DATABASE_ID,
+                    tableId: TABLE_ID,
+                    queries: [
+                        Query.equal('mode', mode),
+                        Query.equal('difficulty', difficulty),
+                        Query.orderDesc('score'),
+                        Query.orderAsc('time_seconds'),
+                        Query.limit(50)
+                    ]
+                });
 
-            if (error) {
+                const data = response.rows; // 返回的数据在 rows 里
+                if (data.length === 0) {
+                    listEl.innerHTML = '<p class="rank-empty">还没有成绩，快来抢第一吧！</p>';
+                    return;
+                }
+
+                listEl.innerHTML = data.map((item, i) => {
+                    const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+                    let rankNum = i < 3 ? `0${i + 1}` : (i + 1).toString();
+                    
+                    return `<div class="rank-item">
+                        <span class="rank-no ${rankClass}">${rankNum}</span>
+                        <img class="rank-avatar" src="${item.avatar_url || ''}" alt="">
+                        <span class="rank-name">${item.username}</span>
+                        <span class="rank-score">${item.score} 分</span>
+                        <span class="rank-time">${formatTime(item.time_seconds)}</span>
+                    </div>`;
+                }).join('');
+            } catch (error) {
+                console.error('加载排行榜失败:', error);
                 listEl.innerHTML = '<p class="rank-empty">排行榜加载失败</p>';
-                return;
             }
-            if (!data || data.length === 0) {
-                listEl.innerHTML = '<p class="rank-empty">还没有成绩，快来抢第一吧！</p>';
-                return;
-            }
-
-            listEl.innerHTML = data.map((item, i) => {
-                const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-                // 使用 01, 02, 03 替代 Emoji 奖牌，其他排名直接显示数字
-                let rankNum = i < 3 ? `0${i + 1}` : (i + 1).toString();
-                
-                return `<div class="rank-item">
-                    <span class="rank-no ${rankClass}">${rankNum}</span>
-                    <img class="rank-avatar" src="${item.avatar_url || ''}" alt="">
-                    <span class="rank-name">${item.username}</span>
-                    <span class="rank-score">${item.score} 分</span>
-                    <span class="rank-time">${formatTime(item.time_seconds)}</span>
-                </div>`;
-            }).join('');
         }
 
         function formatTime(sec) {
@@ -169,72 +177,77 @@
         }
 
         async function init() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            currentUser = session ? session.user : null;
-            renderUserBar();
-            switchDifficulty(currentDifficulty);   
+            await checkUser();
+            switchDifficulty(currentDifficulty);
             loadRank(rankMode, rankDifficulty);
-        }
 
-        init();
-
-        supabaseClient.auth.onAuthStateChange(async (event, session) => {
-            currentUser = session ? session.user : null;
-            renderUserBar();
-
-            if (session) {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('userId') && currentUser) {
                 const pending = localStorage.getItem('pending_score');
                 if (pending) {
                     try {
                         const p = JSON.parse(pending);
-                        const user = session.user;
-                        const diff = p.difficulty || 'easy';
-
-                        const { data: existing } = await supabaseClient
-                            .from('scores')
-                            .select('score, time_seconds')
-                            .eq('user_id', user.id)
-                            .eq('mode', p.mode)
-                            .eq('difficulty', diff)
-                            .maybeSingle();
-
-                        const isBetter = !existing ||
-                            p.score > existing.score ||
-                            (p.score === existing.score && p.time_seconds < existing.time_seconds);
-
-                        if (isBetter) {
-                            if (existing) {
-                                await supabaseClient.from('scores')
-                                    .update({
-                                        score: p.score,
-                                        time_seconds: p.time_seconds,
-                                        updated_at: new Date()
-                                    })
-                                    .eq('user_id', user.id)
-                                    .eq('mode', p.mode)
-                                    .eq('difficulty', diff);
-                            } else {
-                                await supabaseClient.from('scores').insert({
-                                    user_id: user.id,
-                                    username: user.user_metadata.user_name,
-                                    avatar_url: user.user_metadata.avatar_url,
-                                    mode: p.mode,
-                                    difficulty: diff,
-                                    score: p.score,
-                                    time_seconds: p.time_seconds
-                                });
-                            }
-                        }
+                        await submitPendingScore(p);
                         localStorage.removeItem('pending_score');
-                        loadRank(rankMode, rankDifficulty);
                     } catch (e) {
                         console.error('提交暂存成绩失败：', e);
                     }
-                } else {
                     loadRank(rankMode, rankDifficulty);
+                    window.history.replaceState({}, document.title, window.location.pathname);
                 }
             }
-        });
+        }
+
+        async function submitPendingScore(p) {
+            if (!currentUser) return;
+            
+            try {
+                const existing = await tablesDB.listRows({
+                    databaseId: DATABASE_ID,
+                    tableId: TABLE_ID,
+                    queries: [
+                        Query.equal('user_id', currentUser.$id),
+                        Query.equal('mode', p.mode),
+                        Query.equal('difficulty', p.difficulty)
+                    ]
+                });
+
+                const isBetter = existing.total === 0 || 
+                                 p.score > existing.rows[0].score ||
+                                 (p.score === existing.rows[0].score && p.time_seconds < existing.rows[0].time_seconds);
+
+                if (isBetter) {
+                    const avatarUrl = `https://github.com/${currentUser.name}.png`;
+                    if (existing.total > 0) {
+                        await tablesDB.updateRow({
+                            databaseId: DATABASE_ID,
+                            tableId: TABLE_ID,
+                            rowId: existing.rows[0].$id,
+                            data: { score: p.score, time_seconds: p.time_seconds }
+                        });
+                    } else {
+                        await tablesDB.createRow({
+                            databaseId: DATABASE_ID,
+                            tableId: TABLE_ID,
+                            rowId: ID.unique(),
+                            data: {
+                                user_id: currentUser.$id,
+                                username: currentUser.name,
+                                avatar_url: avatarUrl,
+                                mode: p.mode,
+                                difficulty: p.difficulty,
+                                score: p.score,
+                                time_seconds: p.time_seconds
+                            }
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error("提交失败：", e);
+            }
+        }
+
+        init();
 
         const sakuraBg = document.getElementById('sakura-bg');
         for (let i = 0; i < 30; i++) {
