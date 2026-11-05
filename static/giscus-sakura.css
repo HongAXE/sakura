@@ -1,4 +1,4 @@
-/* 直接写在最外层 */
+main {
   /* 背景：羊皮纸底色 */
   --color-canvas-default: #f5f0e8;
   --color-canvas-overlay: #ede6db;
@@ -29,3 +29,4 @@
   /* 圆角：禁用大圆角 */
   --border-radius: 0px;
   --borderRadius: 0px;
+}
