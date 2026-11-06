@@ -12,34 +12,54 @@
     <section class="hero">
         <div class="hero-badge">深圳科学高中 · 正统 ACGN 社团</div>
         <div class="logo-wrapper">
-            <img src="static/image/sakura.png" alt="樱花社社徽">
-        </div>
-        <h1>科高樱花社</h1>
-        <p>历久弥新，为热爱 ACGN 的科高学子提供交流与分享的平台。<br>找绅士，找秀吉，到科高樱花社！</p>
+            <img src=<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科高樱花社 · 深圳科学高中 ACGN 同好会</title>
+    <link rel="stylesheet" href="static/sakura.css">
+</head>
+<body>
+    <div class="sakura-bg" id="sakura-bg"></div>
 
-        <div class="sos-tribute">
-            <p class="sos-line1">樱花社又何尝不是 SOS 团呢？</p>
-            <p class="sos-line2">Subculture o Ooini Moriageru tame no Sakura no Dan</p>
-            <p class="sos-line3">为了大大振兴亚文化而组成的樱花团</p>
+    <section class="hero">
+        <!-- 左侧：主视觉 -->
+        <div class="hero-left">
+            <div class="hero-badge">深圳科学高中 · 正统 ACGN 社团</div>
+            <div class="logo-wrapper">
+                <img src="static/image/sakura.png" alt="樱花社社徽">
+            </div>
+            <h1>科高樱花社</h1>
+            <p>找绅士，找秀吉，到科高樱花社！</p>
         </div>
 
-        <div class="quick-nav">
-            <a href="history/" class="btn-card">
-                <div class="icon-seal">史</div>
-                <span>阅览社史</span>
-            </a>
-            <a href="quiz/" class="btn-card">
-                <div class="icon-seal">测</div>
-                <span>动漫小测</span>
-            </a>
-            <a href="links/" class="btn-card">
-                <div class="icon-seal">链</div>
-                <span>其他相关</span>
-            </a>
-            <a href="comment/" class="btn-card">
-                <div class="icon-seal">言</div>
-                <span>社员留言</span>
-            </a>
+        <!-- 右侧：便签与菜单 -->
+        <div class="hero-right">
+            <div class="sos-tribute">
+                <p class="sos-line1">樱花社又何尝不是 SOS 团呢？</p>
+                <p class="sos-line2">Subculture o Ooini Moriageru tame no Sakura no Dan</p>
+                <p class="sos-line3">为了大大振兴亚文化而组成的樱花团</p>
+            </div>
+
+            <div class="quick-nav">
+                <a href="history/" class="btn-card">
+                    <div class="icon-seal">史</div>
+                    <span>阅览社史</span>
+                </a>
+                <a href="quiz/" class="btn-card">
+                    <div class="icon-seal">测</div>
+                    <span>动漫小测</span>
+                </a>
+                <a href="links/" class="btn-card">
+                    <div class="icon-seal">链</div>
+                    <span>其他相关</span>
+                </a>
+                <a href="comment/" class="btn-card">
+                    <div class="icon-seal">言</div>
+                    <span>社员留言</span>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -65,6 +85,13 @@
             sakuraBg.appendChild(sakura);
         }
     </script>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sakura/sw.js');
+      }
+    </script>
+
     <script src="static/music-player.js" data-src="static/music/music.mp3"></script>
     <script defer src="https://events.vercount.one/js"></script>
 </body>
