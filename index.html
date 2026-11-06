@@ -73,8 +73,17 @@
     </script>
 
     <script>
+      // 注册 Service Worker
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sakura/sw.js');
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js') // 相对路径，找到根目录的 sw.js
+            .then(registration => {
+              console.log('✅ Service Worker 注册成功，作用域:', registration.scope);
+            })
+            .catch(err => {
+              console.error('❌ Service Worker 注册失败:', err);
+            });
+        });
       }
     </script>
 
