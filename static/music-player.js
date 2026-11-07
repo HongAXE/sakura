@@ -23,7 +23,7 @@
     // ==========================================
     const style = document.createElement('style');
     style.textContent = `
-        /* ... 保留原有的主播放器和侧边栏基础样式 ... */
+        /* 主播放器与侧边栏基础样式保持不变 */
         #kgri-player { position: fixed; top: 20px; right: 20px; z-index: 1000; background: var(--bg-color, #f6f1e9); border: 2px solid var(--border-dark, #b5a99a); box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; width: 260px; transition: width 0.2s, height 0.2s; font-family: 'Zpix', sans-serif; user-select: none; }
         #kgri-player.collapsed { width: 44px; height: 44px; cursor: pointer; }
         #kgri-player.collapsed .kgri-player-body, #kgri-player.collapsed .kgri-player-btn, #kgri-player.collapsed .kgri-player-header { display: none; }
@@ -41,6 +41,7 @@
         .kgri-btn-play { background: var(--sakura-pink, #b04e62); color: #fff; border-color: var(--sakura-dark, #853545); padding: 4px 16px; }
         .kgri-settings-btn { background: transparent; border: none; color: var(--text-sub, #6b6159); font-size: 1.1rem; cursor: pointer; padding: 4px; }
         .kgri-settings-btn:hover { color: var(--sakura-pink, #b04e62); }
+        
         #kgri-sidebar { position: fixed; top: 0; right: -360px; width: 340px; height: 100vh; background: var(--bg-color, #f6f1e9); border-left: 2px solid var(--border-dark, #b5a99a); box-shadow: -4px 0 0 rgba(0,0,0,0.05); z-index: 1001; transition: right 0.3s ease; display: flex; flex-direction: column; font-family: 'Zpix', sans-serif; }
         #kgri-sidebar.open { right: 0; }
         .kgri-sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 2px solid var(--border-dark, #b5a99a); background: #fff; }
@@ -48,32 +49,54 @@
         .kgri-close-btn { background: transparent; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-sub, #6b6159); }
         .kgri-sidebar-content { padding: 20px; overflow-y: auto; flex: 1; }
         .kgri-section-title { font-size: 0.95rem; color: var(--sakura-dark, #853545); margin-bottom: 12px; border-left: 3px solid var(--sakura-pink, #b04e62); padding-left: 8px; font-weight: 600; }
+        
         .kgri-playlist { list-style: none; padding: 0; margin: 0 0 24px 0; border: 1px solid var(--border-color, #d3c9bd); background: #fff; min-height: 50px; }
         .kgri-playlist-item { padding: 10px 12px; border-bottom: 1px dashed var(--border-color, #d3c9bd); cursor: pointer; font-size: 0.85rem; color: var(--text-sub, #6b6159); transition: all 0.2s; }
         .kgri-playlist-item:last-child { border-bottom: none; }
         .kgri-playlist-item:hover { background: var(--bg-color, #f6f1e9); color: var(--text-main, #2b2725); }
         .kgri-playlist-item.active { color: var(--sakura-pink, #b04e62); font-weight: 600; background: rgba(176, 78, 98, 0.05); }
+        
         #kgri-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1000; display: none; opacity: 0; transition: opacity 0.3s; }
         #kgri-overlay.show { display: block; opacity: 1; }
         
-        /* 文件管理器 UI */
-        .kgri-cache-box { border: 1px solid var(--border-color, #d3c9bd); background: #fff; padding: 12px; margin-bottom: 24px; }
+        /* 存储管理 UI */
+        .kgri-cache-box { border: 1px solid var(--border-color, #d3c9bd); background: #fff; padding: 12px; margin-bottom: 16px; }
         .kgri-cache-info { font-size: 0.85rem; color: var(--text-sub, #6b6159); margin-bottom: 12px; display: flex; justify-content: space-between; }
         .kgri-clear-btn { width: 100%; padding: 8px; background: var(--bg-color, #f6f1e9); border: 1px solid var(--border-dark, #b5a99a); color: var(--text-main, #2b2725); font-family: inherit; cursor: pointer; box-shadow: 2px 2px 0 rgba(0,0,0,0.05); transition: all 0.1s; }
         .kgri-clear-btn:active { transform: translate(2px, 2px); box-shadow: none; }
         .kgri-clear-btn:hover { border-color: var(--sakura-pink, #b04e62); color: var(--sakura-pink, #b04e62); }
         
-        /* 缓存文件列表 */
-        .kgri-cache-group { margin-bottom: 16px; border: 1px solid var(--border-dark); background: #fff; }
-        .kgri-cache-group-header { background: var(--bg-color); padding: 8px 10px; border-bottom: 1px solid var(--border-dark); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
-        .kgri-cache-group-header button { background: transparent; border: none; color: #d9534f; font-size: 0.75rem; cursor: pointer; text-decoration: underline; }
-        .kgri-cache-file-list { list-style: none; padding: 0; margin: 0; max-height: 150px; overflow-y: auto; }
-        .kgri-cache-file-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; font-size: 0.75rem; border-bottom: 1px dashed var(--border-color); color: var(--text-sub); }
-        .kgri-cache-file-item:last-child { border-bottom: none; }
-        .kgri-file-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-        .kgri-file-del { background: transparent; border: none; color: var(--text-sub); cursor: pointer; font-weight: bold; }
-        .kgri-file-del:hover { color: #d9534f; }
-        .kgri-empty-cache { text-align: center; padding: 20px; font-size: 0.85rem; color: var(--text-sub); }
+        /* ======= 树状图核心样式 ======= */
+        .kgri-tree-container { border: 1px solid var(--border-color, #d3c9bd); background: #fff; padding: 10px; max-height: 350px; overflow-y: auto; }
+        .kgri-tree-root { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; }
+        
+        /* 隐藏默认箭头 */
+        .kgri-tree details > summary { list-style: none; cursor: pointer; user-select: none; outline: none; }
+        .kgri-tree details > summary::-webkit-details-marker { display: none; }
+        
+        .kgri-tree summary { display: flex; align-items: center; padding: 4px 0; color: var(--text-main); gap: 6px; font-weight: 600; }
+        .kgri-tree summary:hover { background: var(--bg-color); }
+        
+        /* 自定义加减号 */
+        .kgri-tree summary::before { content: '+'; display: inline-block; width: 14px; text-align: center; color: var(--text-sub); font-family: monospace; }
+        .kgri-tree details[open] > summary::before { content: '-'; }
+        
+        .kgri-tree ul { list-style: none; padding-left: 20px; margin: 0; border-left: 1px dashed var(--border-color); }
+        
+        /* 文件节点 */
+        .kgri-tree-file { display: flex; align-items: center; justify-content: space-between; padding: 4px 0 4px 20px; color: var(--text-sub); border-bottom: 1px dashed rgba(0,0,0,0.03); }
+        .kgri-tree-file:hover { background: var(--bg-color); }
+        .kgri-tree-file-left { display: flex; align-items: center; gap: 6px; overflow: hidden; }
+        .kgri-tree-type { font-family: monospace; font-size: 0.75rem; color: var(--sakura-pink); background: rgba(176, 78, 98, 0.1); padding: 1px 4px; border-radius: 2px; }
+        
+        .kgri-tree-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+        
+        /* 删除按钮 */
+        .kgri-file-del, .kgri-dir-del { background: transparent; border: none; color: #d9534f; cursor: pointer; font-size: 0.8rem; padding: 2px 6px; opacity: 0; transition: opacity 0.2s; }
+        .kgri-tree-file:hover .kgri-file-del, .kgri-tree summary:hover .kgri-dir-del { opacity: 1; }
+        .kgri-file-del:hover, .kgri-dir-del:hover { text-decoration: underline; }
+        
+        .kgri-tree-empty { text-align: center; padding: 20px; font-size: 0.85rem; color: var(--text-sub); }
     `;
     document.head.appendChild(style);
 
@@ -115,8 +138,8 @@
                     <button class="kgri-clear-btn" id="kgri-clear-all">清空所有缓存</button>
                 </div>
                 
-                <div id="kgri-cache-container">
-                    <!-- 缓存文件管理器动态生成区域 -->
+                <div class="kgri-tree-container" id="kgri-cache-container">
+                    <!-- 树状图动态生成区域 -->
                 </div>
             </div>
         </div>
@@ -124,11 +147,8 @@
     document.body.insertAdjacentHTML('beforeend', playerHTML);
 
     // ==========================================
-    // 3. 核心逻辑与数据拉取（保留原有逻辑）
+    // 3. 核心逻辑与数据拉取
     // ==========================================
-    // (这里省略了和上一版完全一样的 loadPlaylist, showStatus, escapeHTML, renderPlaylist, updateUIAndLoad, tryPlay, initPlayer 和事件绑定的代码，请直接将上一版的这部分完整复制过来)
-    // 👇👇 下面是必须替换的交互部分 👇👇
-
     const playerEl = document.getElementById('kgri-player');
     const headerContent = document.getElementById('kgri-header-content');
     const playBtn = playerEl.querySelector('.kgri-play');
@@ -137,12 +157,8 @@
     const overlay = document.getElementById('kgri-overlay');
     const playlistEl = document.getElementById('kgri-playlist');
 
-    // 拉取歌单
     async function loadPlaylist() {
-        if (window.location.protocol === 'file:') {
-            showStatus('本地预览需启动服务器');
-            return;
-        }
+        if (window.location.protocol === 'file:') { showStatus('本地预览需启动服务器'); return; }
         try {
             const response = await fetch(JSON_PATH);
             if (!response.ok) throw new Error('网络请求失败');
@@ -215,7 +231,6 @@
         if (isPlaying) tryPlay();
     }
 
-    // 绑定播放控制
     playBtn.addEventListener('click', () => {
         if (!isReady) return;
         if (isPlaying) { audio.pause(); isPlaying = false; localStorage.setItem('sakura-music-on', 'false'); } 
@@ -249,13 +264,12 @@
         }
     });
 
-    // 侧边栏开关
     function toggleSidebar(open) {
         if (open) {
             sidebar.classList.add('open');
             overlay.classList.add('show');
             updateCacheSize();
-            renderCacheManager(); // 打开时渲染缓存列表
+            renderCacheManager();
         } else {
             sidebar.classList.remove('open');
             overlay.classList.remove('show');
@@ -269,7 +283,7 @@
     playerEl.addEventListener('click', () => { if (playerEl.classList.contains('collapsed')) { playerEl.classList.remove('collapsed'); toggleBtn.textContent = '−'; } });
 
     // ==========================================
-    // 4. 文件管理器式缓存管理逻辑
+    // 4. 树状图缓存管理器逻辑
     // ==========================================
     const cacheContainer = document.getElementById('kgri-cache-container');
 
@@ -281,99 +295,156 @@
         }
     }
 
+    // 将缓存请求转化为树状数据
+    function buildCacheTree(requests) {
+        const root = {};
+        
+        requests.forEach(req => {
+            const urlObj = new URL(req.url);
+            // 将路径 /sakura/static/image/logo.png 拆分成 ['sakura', 'static', 'image', 'logo.png']
+            const parts = urlObj.pathname.split('/').filter(p => p); 
+            
+            let current = root;
+            parts.forEach((part, index) => {
+                const isFile = index === parts.length - 1;
+                
+                if (!current[part]) {
+                    current[part] = {
+                        name: part,
+                        isFile: isFile,
+                        url: req.url,
+                        children: {}
+                    };
+                }
+                if (!isFile) {
+                    current = current[part].children;
+                }
+            });
+        });
+        
+        return root;
+    }
+
+    // 递归渲染树状 HTML
+    function renderTreeDOM(treeNodes, isRoot = false) {
+        let html = isRoot ? '<ul class="kgri-tree-root">' : '<ul>';
+        
+        // 文件夹在前，文件在后；按字母排序
+        const sortedKeys = Object.keys(treeNodes).sort((a, b) => {
+            if (treeNodes[a].isFile === treeNodes[b].isFile) return a.localeCompare(b);
+            return treeNodes[a].isFile ? 1 : -1;
+        });
+
+        sortedKeys.forEach(key => {
+            const node = treeNodes[key];
+            if (node.isFile) {
+                html += `
+                    <li class="kgri-tree-file">
+                        <div class="kgri-tree-file-left">
+                            <span class="kgri-tree-type">[F]</span>
+                            <span class="kgri-tree-name" title="${node.url}">${node.name}</span>
+                        </div>
+                        <button class="kgri-file-del" data-url="${node.url}" data-cache="sakura-cache-v2">删除</button>
+                    </li>
+                `;
+            } else {
+                // 递归生成子目录。判断子目录里是否包含了当前页面的 html 等
+                html += `
+                    <li class="kgri-tree-folder">
+                        <details open>
+                            <summary>
+                                <span class="kgri-tree-name">${node.name}</span>
+                                <button class="kgri-dir-del" data-path="/${key}/">删目录</button>
+                            </summary>
+                            ${renderTreeDOM(node.children)}
+                        </details>
+                    </li>
+                `;
+            }
+        });
+        html += '</ul>';
+        return html;
+    }
+
     async function renderCacheManager() {
         if (!('caches' in window)) {
-            cacheContainer.innerHTML = '<div class="kgri-empty-cache">当前浏览器不支持缓存查询</div>';
+            cacheContainer.innerHTML = '<div class="kgri-tree-empty">当前浏览器不支持缓存查询</div>';
             return;
         }
 
         try {
             const cacheNames = await caches.keys();
-            if (cacheNames.length === 0) {
-                cacheContainer.innerHTML = '<div class="kgri-empty-cache">暂无缓存数据</div>';
+            // 我们主要处理 sw 生成的 sakura-cache-v2
+            const targetCacheName = cacheNames.find(n => n.includes('sakura-cache')) || cacheNames[0];
+
+            if (!targetCacheName) {
+                cacheContainer.innerHTML = '<div class="kgri-tree-empty">暂无缓存数据</div>';
                 return;
             }
 
-            let html = '';
-            for (const name of cacheNames) {
-                const cache = await caches.open(name);
-                const requests = await cache.keys();
+            const cache = await caches.open(targetCacheName);
+            const requests = await cache.keys();
 
-                // 按页面路径分组
-                const groups = {};
-                requests.forEach(req => {
-                    const url = new URL(req.url);
-                    let path = url.pathname;
-                    // 如果是以 .html 或 / 结尾，算作主页
-                    let groupName = path.includes('.html') || path.endsWith('/') ? path : path.substring(0, path.lastIndexOf('/') + 1);
-                    
-                    if (!groups[groupName]) groups[groupName] = [];
-                    groups[groupName].push(req);
-                });
-
-                // 渲染分组
-                for (const [groupName, reqs] of Object.entries(groups)) {
-                    html += `<div class="kgri-cache-group">
-                        <div class="kgri-cache-group-header">
-                            <span title="${groupName}">${groupName.length > 20 ? '...' + groupName.slice(-15) : groupName}</span>
-                            <button data-group="${groupName}" data-cache="${name}" class="kgri-del-group">清除此页</button>
-                        </div>
-                        <ul class="kgri-cache-file-list">`;
-                    
-                    reqs.forEach(req => {
-                        const url = new URL(req.url);
-                        const fileName = url.pathname.split('/').pop() || 'index.html';
-                        html += `<li class="kgri-cache-file-item">
-                            <span class="kgri-file-name" title="${url.pathname}">${fileName}</span>
-                            <button class="kgri-file-del" data-url="${req.url}" data-cache="${name}">✕</button>
-                        </li>`;
-                    });
-                    html += `</ul></div>`;
-                }
+            if (requests.length === 0) {
+                cacheContainer.innerHTML = '<div class="kgri-tree-empty">暂无缓存文件</div>';
+                return;
             }
-            cacheContainer.innerHTML = html;
 
-            // 绑定删除单个文件的事件
+            const treeData = buildCacheTree(requests);
+            cacheContainer.innerHTML = `<div class="kgri-tree">${renderTreeDOM(treeData, true)}</div>`;
+
+            // 绑定事件：阻止按钮点击触发折叠
+            document.querySelectorAll('.kgri-dir-del').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+            });
             document.querySelectorAll('.kgri-file-del').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            });
+
+            // 使用事件委托绑定删除动作
+            cacheContainer.onclick = async (e) => {
+                // 删除单个文件
+                if (e.target.classList.contains('kgri-file-del')) {
                     const url = e.target.dataset.url;
                     const cacheName = e.target.dataset.cache;
-                    const cache = await caches.open(cacheName);
-                    await cache.delete(url);
-                    renderCacheManager(); // 刷新列表
+                    const c = await caches.open(cacheName);
+                    await c.delete(url);
+                    renderCacheManager();
                     updateCacheSize();
-                });
-            });
-
-            // 绑定删除某个分组的事件
-            document.querySelectorAll('.kgri-del-group').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    if (!confirm('确定要清除该页面下的所有缓存文件吗？')) return;
-                    const groupName = e.target.dataset.group;
-                    const cacheName = e.target.dataset.cache;
-                    const cache = await caches.open(cacheName);
-                    const requests = await cache.keys();
+                }
+                
+                // 删除整个目录
+                if (e.target.classList.contains('kgri-dir-del')) {
+                    const pathPrefix = e.target.dataset.path;
+                    if (!confirm(`确定要清除目录 ${pathPrefix} 下的所有文件吗？`)) return;
                     
-                    for (const req of requests) {
-                        const url = new URL(req.url);
-                        const path = url.pathname;
-                        let reqGroup = path.includes('.html') || path.endsWith('/') ? path : path.substring(0, path.lastIndexOf('/') + 1);
-                        if (reqGroup === groupName) {
-                            await cache.delete(req);
+                    const c = await caches.open(targetCacheName);
+                    const reqs = await c.keys();
+                    let count = 0;
+                    
+                    for (const req of reqs) {
+                        const reqPath = new URL(req.url).pathname;
+                        if (reqPath.includes(pathPrefix)) {
+                            await c.delete(req);
+                            count++;
                         }
                     }
-                    renderCacheManager(); // 刷新列表
+                    renderCacheManager();
                     updateCacheSize();
-                });
-            });
+                }
+            };
 
         } catch (error) {
             console.error('读取缓存失败:', error);
-            cacheContainer.innerHTML = '<div class="kgri-empty-cache" style="color:#d9534f;">读取缓存失败</div>';
+            cacheContainer.innerHTML = '<div class="kgri-tree-empty" style="color:#d9534f;">读取缓存失败</div>';
         }
     }
 
-    // 清空全部缓存
     document.getElementById('kgri-clear-all').addEventListener('click', async () => {
         if (!confirm('⚠️ 确定要清空所有缓存吗？下次访问将重新下载所有文件。')) return;
         if ('caches' in window) {
