@@ -199,6 +199,7 @@ footer {
    二、主页样式
    ============================================================ */
 
+/* 基础（移动端 / 中等宽度）：垂直居中单列 */
 .hero {
     display: flex;
     flex-direction: column;
@@ -206,6 +207,15 @@ footer {
     justify-content: center;
     text-align: center;
     padding: 80px 20px 40px;
+}
+
+/* 左侧主视觉容器：强制居中 */
+.hero-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    text-align: center;
+    width: 100%;
 }
 
 .hero-badge {
@@ -243,7 +253,6 @@ footer {
     margin-bottom: 40px;
 }
 
-/* 社徽 Logo：做成像素相框 */
 .logo-wrapper {
     margin-bottom: 32px;
     display: inline-block;
@@ -266,16 +275,17 @@ footer {
     transform: scale(1.05);
 }
 
-/* 快捷入口：做成实体按键 */
+/* 快捷入口：改为 2x2 网格，解决 3+1 问题 */
 .quick-nav {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 60px;
+    margin-bottom: 20px;
     width: 100%;
-    max-width: 800px;
-    padding: 0 20px;
+    max-width: 520px; /* 限制最大宽度，防止中等屏幕下拉得奇形怪状 */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .btn-card {
@@ -283,9 +293,7 @@ footer {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex: 1;
-    min-width: 200px;
-    max-width: 280px;
+    width: 100%;
     height: 100px;
     background: var(--bg-color);
     text-decoration: none;
@@ -296,6 +304,87 @@ footer {
     padding: 16px;
 }
 
+.sos-tribute {
+    margin-top: 0;
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--sakura-pink);
+    box-shadow: var(--shadow-hard-sm);
+    text-align: left;
+    width: 100%;
+    max-width: 520px;
+    display: inline-block;
+    position: relative;
+}
+
+.sos-tribute::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    border-width: 0 0 16px 16px;
+    border-style: solid;
+    border-color: transparent transparent var(--bg-color) transparent;
+}
+
+/* ============================================================
+   重点：宽屏（PC端 > 860px）双栏排版
+   ============================================================ */
+@media (min-width: 860px) {
+    .hero {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 100px 40px 60px;
+        align-items: center;
+    }
+
+    /* 让宽屏下的左侧内容也保持居中平衡 */
+    .hero-left {
+        align-items: center;
+        text-align: center;
+    }
+
+    .hero h1 {
+        font-size: 3.2rem;
+        margin-bottom: 24px;
+    }
+
+    .hero p {
+        margin-bottom: 0;
+    }
+
+    .logo-wrapper {
+        margin-bottom: 40px;
+    }
+
+    /* 右侧功能区 */
+    .hero-right {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .sos-tribute {
+        max-width: 100%;
+        margin-bottom: 0;
+    }
+
+    /* 宽屏下取消限制，让 2x2 按钮占满右栏 */
+    .quick-nav {
+        max-width: none;
+    }
+
+    .btn-card {
+        height: 110px;
+    }
+}
+
+/* 悬浮和按压交互保持不变 */
 .btn-card:hover {
     background: #fff;
     border-color: var(--sakura-pink);
@@ -307,34 +396,7 @@ footer {
     box-shadow: none;
 }
 
-.btn-card .icon { font-size: 1.5rem; margin-bottom: 10px; color: var(--sakura-pink); }
 .btn-card span { font-weight: 600; font-size: 1rem; }
-
-/* S.O.S. 团致敬：做成纸质便签 */
-.sos-tribute {
-    margin-top: 0;
-    margin-bottom: 40px;
-    padding: 20px;
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-left: 4px solid var(--sakura-pink);
-    box-shadow: var(--shadow-hard-sm);
-    text-align: left;
-    max-width: 520px;
-    display: inline-block;
-    position: relative;
-}
-
-/* 便签的折角装饰 */
-.sos-tribute::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    border-width: 0 0 16px 16px;
-    border-style: solid;
-    border-color: transparent transparent var(--bg-color) transparent;
-}
 
 .sos-line1 {
     font-size: 0.95rem;
@@ -351,6 +413,68 @@ footer {
 .sos-line3 {
     font-size: 0.85rem;
     color: var(--text-sub);
+}
+
+/* ============================================================
+   主页移动端（竖屏）精细微调：解决比例失调与折行问题
+   ============================================================ */
+@media (max-width: 600px) {
+    /* 1. 优化 S.O.S 便签内部排版 */
+    .sos-tribute {
+        padding: 16px;
+        margin-bottom: 32px;
+    }
+    
+    .sos-tribute p {
+        line-height: 1.5; /* 强制缩小行高，让中英文排版更紧凑 */
+    }
+
+    .sos-line1 {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    .sos-line2 {
+        font-size: 0.7rem;
+        margin-bottom: 16px; /* 英文和中文之间留点呼吸感，但不要太大 */
+        word-break: break-word;
+    }
+
+    .sos-line3 {
+        font-size: 0.8rem;
+        /* 防止“樱花团”被生硬拆成“樱花”和“团”两行 */
+        word-break: keep-all; 
+    }
+
+    /* 2. 优化大标题下的副标题 */
+    .hero p {
+        font-size: 0.9rem; /* 稍微缩小字号 */
+        line-height: 1.6;
+        margin-bottom: 32px;
+        padding: 0 10px;
+    }
+
+    /* 3. 优化四宫格按钮的大小与间距 */
+    .quick-nav {
+        gap: 12px; /* 缩小按钮之间的缝隙 */
+        max-width: 100%; /* 撑满屏幕宽度 */
+    }
+
+    .btn-card {
+        height: 85px; /* 降低高度，显得不那么笨重 */
+        padding: 10px;
+    }
+
+    .icon-seal {
+        width: 28px;
+        height: 28px;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
+
+    .btn-card span {
+        font-size: 0.9rem;
+    }
 }
 
 /* ============================================================
@@ -1138,7 +1262,7 @@ footer {
         padding: 12px 14px;
     }
     .group-avatar {
-        width: 44
+        width: 44px;
         height: 44px;
     }
 }
